@@ -153,7 +153,10 @@ function dealRef(d: Pick<DocRow, 'deal_id' | 'deal_title' | 'deal_url'>): DealRe
 }
 
 function buildWhere(actor: Actor, f: DocumentFilters, p: Params): string {
-  const u = p.add(actor.id);
+  // Параметр текущего пользователя добавляется только при использовании: неиспользуемый
+  // параметр PostgreSQL не может типизировать («could not determine data type of parameter»).
+  let uRef: string | null = null;
+  const me = (): string => (uRef ??= p.add(actor.id));
   const cond: string[] = [docVisibleSql(actor, 'd', p)];
   if (f.q && f.q.trim()) {
     const pat = p.add(like(f.q.trim()));
@@ -161,16 +164,16 @@ function buildWhere(actor: Actor, f: DocumentFilters, p: Params): string {
   }
   switch (f.scope) {
     case 'mine':
-      cond.push(`d.initiator_id = ${u}`);
+      cond.push(`d.initiator_id = ${me()}`);
       break;
     case 'to_approve':
-      cond.push(`d.status = 'in_review' AND ${pendingStepSql('d', u)}`);
+      cond.push(`d.status = 'in_review' AND ${pendingStepSql('d', me())}`);
       break;
     case 'to_sign':
-      cond.push(`d.status = 'on_signing' AND d.signer_id = ${u}`);
+      cond.push(`d.status = 'on_signing' AND d.signer_id = ${me()}`);
       break;
     case 'to_acknowledge':
-      cond.push(needAckSql('d', u));
+      cond.push(needAckSql('d', me()));
       break;
     default:
       break;
@@ -189,13 +192,13 @@ function buildWhere(actor: Actor, f: DocumentFilters, p: Params): string {
   if (f.overdue) cond.push(DOC_OVERDUE_SQL('d'));
   if (f.overdueMine) {
     cond.push(
-      `${DOC_OVERDUE_SQL('d')} AND ((d.status = 'in_review' AND ${pendingStepSql('d', u)})
-        OR (d.status = 'on_signing' AND d.signer_id = ${u}) OR (d.status = 'rework' AND d.initiator_id = ${u}))`,
+      `${DOC_OVERDUE_SQL('d')} AND ((d.status = 'in_review' AND ${pendingStepSql('d', me())})
+        OR (d.status = 'on_signing' AND d.signer_id = ${me()}) OR (d.status = 'rework' AND d.initiator_id = ${me()}))`,
     );
   }
   if (f.pendingAcknowledgement) {
     cond.push(`d.kind = 'order' AND d.status = 'approved' AND ${PENDING_ACK_SQL}`);
-    if (!isAuditor(actor)) cond.push(`(d.initiator_id = ${u} OR d.signer_id = ${u})`);
+    if (!isAuditor(actor)) cond.push(`(d.initiator_id = ${me()} OR d.signer_id = ${me()})`);
   }
   return cond.join(' AND ');
 }

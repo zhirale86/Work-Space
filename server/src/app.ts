@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import multipart from '@fastify/multipart';
 import fastifyStatic from '@fastify/static';
-import Fastify, { type FastifyError, type FastifyInstance } from 'fastify';
+import Fastify, { type FastifyError, type FastifyInstance, LogController } from 'fastify';
 import { adminRoutes } from './admin/routes';
 import type { ApiErrorBody } from './api-types';
 import { approvalRoutes } from './approvals/routes';
@@ -35,7 +35,7 @@ export async function buildApp(): Promise<FastifyInstance> {
     logger: config.logLevel === 'silent' ? false : { level: config.logLevel, redact: ['req.headers.cookie', 'req.headers.authorization'] },
     trustProxy: config.trustProxy,
     bodyLimit: 1024 * 1024,
-    disableRequestLogging: config.logLevel !== 'debug',
+    logController: new LogController({ disableRequestLogging: config.logLevel !== 'debug' }),
   });
   ensureFilesDir();
 

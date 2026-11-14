@@ -55,21 +55,22 @@ export interface TaskFilters {
 }
 
 function buildWhere(actor: Actor, f: TaskFilters, p: Params): string {
-  const u = p.add(actor.id);
+  let uRef: string | null = null;
+  const me = (): string => (uRef ??= p.add(actor.id));
   const cond = [taskVisibleSql(actor, 't', p)];
   if (f.q?.trim()) {
     const pat = p.add(like(f.q.trim()));
     cond.push(`(t.number ILIKE ${pat} OR t.title ILIKE ${pat})`);
   }
-  if (f.scope === 'assigned') cond.push(`t.assignee_id = ${u}`);
-  if (f.scope === 'authored') cond.push(`t.author_id = ${u}`);
+  if (f.scope === 'assigned') cond.push(`t.assignee_id = ${me()}`);
+  if (f.scope === 'authored') cond.push(`t.author_id = ${me()}`);
   if (f.statuses?.length) cond.push(`t.status = ANY(${p.add(f.statuses)}::text[])`);
   if (f.overdue) cond.push(TASK_OVERDUE_SQL('t'));
   if (f.documentId) cond.push(`t.document_id = ${p.add(f.documentId)}`);
   if (f.assigneeId) cond.push(`t.assignee_id = ${p.add(f.assigneeId)}`);
   if (f.overdueMine) {
     cond.push(
-      `${TASK_OVERDUE_SQL('t')} AND ((t.status IN ('new','in_progress') AND t.assignee_id = ${u}) OR (t.status = 'review' AND t.author_id = ${u}))`,
+      `${TASK_OVERDUE_SQL('t')} AND ((t.status IN ('new','in_progress') AND t.assignee_id = ${me()}) OR (t.status = 'review' AND t.author_id = ${me()}))`,
     );
   }
   return cond.join(' AND ');
