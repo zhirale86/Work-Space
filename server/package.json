@@ -1,0 +1,29 @@
+{
+  "name": "docflow-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Сервер внутренней системы документооборота и согласования",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/src/server.js",
+    "migrate": "node dist/src/migrate.js",
+    "seed": "node dist/src/seed.js",
+    "dev": "tsc -p tsconfig.json && node dist/src/server.js",
+    "test": "tsc -p tsconfig.json && node --test --test-concurrency=1 \"dist/test/**/*.test.js\""
+  },
+  "dependencies": {
+    "@fastify/multipart": "^9.4.0",
+    "@fastify/static": "^8.3.0",
+    "fastify": "^5.12.8",
+    "pg": "^8.23.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/pg": "^8.23.1",
+    "typescript": "^5.9.3"
+  }
+}

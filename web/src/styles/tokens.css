@@ -1,0 +1,167 @@
+/* ==========================================================================
+   UTECH · Документооборот — дизайн-токены
+   Подключается первым. Все значения интерфейса берутся только отсюда.
+   ========================================================================== */
+
+/* Локальное подключение Inter. Файлы кладутся в web/public/fonts/.
+   Если файлов нет — браузер молча берёт установленный Inter или следующий
+   шрифт из стека; страница не ломается. Внешние шрифтовые сервисы не используются. */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: local("Inter Variable"), local("InterVariable"),
+       url("/fonts/InterVariable.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local("Inter"), local("Inter Regular"), local("Inter-Regular"),
+       url("/fonts/Inter-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: local("Inter Medium"), local("Inter-Medium"),
+       url("/fonts/Inter-Medium.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local("Inter SemiBold"), local("Inter-SemiBold"),
+       url("/fonts/Inter-SemiBold.woff2") format("woff2");
+}
+
+:root {
+  /* --- Фирменная палитра ------------------------------------------------ */
+  --c-brand: #A51F2D;          /* бордово-красный: главное действие, акцент */
+  --c-brand-dark: #7E1722;     /* наведение, нажатие, текст на светло-бордовом */
+  --c-brand-light: #C9545F;    /* светлый бордо: декоративные линии, не текст */
+  --c-brand-tint: #F9EEEF;     /* подложка опасных и просроченных состояний */
+  --c-brand-tint-border: #EBCDD0;
+
+  --c-white: #FFFFFF;
+  --c-graphite: #1D1D1F;       /* заголовки и основной текст */
+  --c-graphite-soft: #3A3D42;  /* текст в таблицах и подписях полей */
+  --c-steel: #6E7681;          /* второстепенный текст на белом, иконки */
+  --c-steel-dark: #5C636D;     /* второстепенный текст на серых плашках (контраст ≥ 4,5:1) */
+  --c-gray: #A9B0B8;           /* средний серый: границы полей, неактивные иконки */
+  --c-light: #EEF0F2;          /* плашки, разделители */
+  --c-lighter: #F6F7F8;        /* фон приложения, наведение на строку */
+  --c-line: #E3E6E9;           /* тонкие границы карточек и таблиц */
+
+  /* --- Приглушённые статусные тона (только для статусов) ---------------- */
+  --c-ok: #2F6B4F;             /* спокойный зелёный: текст и точка */
+  --c-ok-tint: #EAF2ED;
+  --c-ok-border: #CFE0D6;
+  --c-warn: #7A5412;           /* янтарный: текст */
+  --c-warn-dot: #B5801F;       /* янтарный: точка и линия */
+  --c-warn-tint: #FAF3E3;
+  --c-warn-border: #EBDDBB;
+
+  /* --- Смысловые роли --------------------------------------------------- */
+  --bg-app: var(--c-lighter);
+  --bg-surface: var(--c-white);
+  --bg-muted: var(--c-light);
+  --bg-hover: var(--c-lighter);
+  --bg-selected: #F3F4F6;
+
+  --text: var(--c-graphite);
+  --text-soft: var(--c-graphite-soft);
+  --text-muted: var(--c-steel);
+  --text-muted-on-gray: var(--c-steel-dark);
+  --text-disabled: #8A919A;
+  --text-on-brand: var(--c-white);
+  --text-danger: var(--c-brand);
+  --text-link: var(--c-graphite);
+
+  --border: var(--c-line);
+  --border-strong: var(--c-gray);
+  --border-control: #C4C9CF;
+  --border-focus: var(--c-graphite);
+
+  /* Инженерная сетка: только общий фон приложения и страница входа */
+  --grid-line: rgba(110, 118, 129, 0.07);
+  --grid-line-major: rgba(110, 118, 129, 0.08);
+  --grid-step: 24px;
+  --grid-step-major: 120px;
+
+  /* --- Типографика ------------------------------------------------------ */
+  --font: "Inter", "Manrope", "IBM Plex Sans", system-ui, sans-serif;
+
+  --fs-12: 12px;   /* только счётчики и служебные подписи вне текста интерфейса */
+  --fs-13: 13px;   /* минимальный размер текста интерфейса: таблицы, подсказки */
+  --fs-14: 14px;   /* основной */
+  --fs-15: 15px;   /* основной крупный, содержимое карточек */
+  --fs-17: 17px;   /* заголовок карточки */
+  --fs-20: 20px;   /* заголовок раздела */
+  --fs-24: 24px;   /* заголовок страницы */
+  --fs-32: 32px;   /* показатель */
+
+  --lh-tight: 1.25;
+  --lh-base: 1.45;
+  --lh-loose: 1.6;
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+
+  /* --- Отступы (шаг 4px) ------------------------------------------------ */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+
+  /* --- Размеры ---------------------------------------------------------- */
+  --control-h: 36px;
+  --control-h-sm: 32px;
+  --control-h-lg: 44px;
+  --sidebar-w: 248px;
+  --sidebar-w-rail: 64px;
+  --topbar-h: 60px;
+  --content-max: 1480px;
+  --aside-w: 348px;
+
+  --radius-sm: 4px;
+  --radius: 6px;
+  --radius-lg: 10px;
+  --radius-pill: 999px;
+
+  /* --- Тени: минимальные, без «свечений» -------------------------------- */
+  --shadow-pop: 0 6px 24px rgba(29, 29, 31, 0.10), 0 1px 2px rgba(29, 29, 31, 0.06);
+  --shadow-modal: 0 16px 48px rgba(29, 29, 31, 0.16);
+  --focus-ring: 0 0 0 2px var(--c-white), 0 0 0 4px var(--c-graphite);
+
+  /* --- Движение --------------------------------------------------------- */
+  --t-fast: 120ms;
+  --t-base: 180ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* --- Слои ------------------------------------------------------------- */
+  --z-sticky: 10;
+  --z-sidebar: 30;
+  --z-topbar: 20;
+  --z-pop: 40;
+  --z-modal: 60;
+  --z-toast: 80;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-fast: 0ms;
+    --t-base: 0ms;
+  }
+}

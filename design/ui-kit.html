@@ -1,0 +1,815 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Документооборот — дизайн-система</title>
+<link rel="stylesheet" href="../web/src/styles/tokens.css">
+<link rel="stylesheet" href="../web/src/styles/ui.css">
+<style>
+  .kit-header { padding: 48px 32px 24px; max-width: 1264px; margin: 0 auto; }
+  .kit-header p { margin-top: 8px; max-width: 76ch; color: var(--text-muted); font-size: var(--fs-15); }
+  .kit-nav { position: sticky; top: 0; z-index: 50; background: var(--c-white); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .kit-nav__inner { display: flex; flex-wrap: wrap; gap: 2px 4px; max-width: 1264px; margin: 0 auto; padding: 8px 24px; }
+  .kit-nav a { display: inline-flex; align-items: center; height: 32px; padding: 0 8px; border-radius: var(--radius); font-size: var(--fs-13); color: var(--c-steel-dark); white-space: nowrap; }
+  .kit-nav a:hover { background: var(--bg-muted); color: var(--text); }
+  .kit-main { max-width: 1264px; margin: 0 auto; padding: 0 32px 64px; }
+  .kit-section { padding-top: 56px; scroll-margin-top: 80px; }
+  .kit-lead { margin: 8px 0 24px; max-width: 86ch; color: var(--text-muted); font-size: var(--fs-15); }
+  .kit-demo { margin-top: 24px; min-width: 0; }
+  .kit-label { margin-bottom: 8px; font-size: var(--fs-13); font-weight: var(--fw-medium); color: var(--text-muted); }
+  .kit-box { padding: 24px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--c-white); }
+  .kit-row { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 16px; align-items: center; padding: 12px 0; border-top: 1px solid var(--border); }
+  .kit-row:first-child { border-top: 0; padding-top: 0; }
+  .kit-row:last-child { padding-bottom: 0; }
+  .kit-row__name { font-weight: var(--fw-medium); }
+  .kit-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; }
+  .kit-swatch__chip { display: block; height: 64px; border-radius: var(--radius); border: 1px solid; }
+  .kit-swatch__name { display: block; margin-top: 8px; font-weight: var(--fw-medium); }
+  .kit-swatch__hex { display: block; font-size: var(--fs-13); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .kit-stage .modal-backdrop { position: relative; inset: auto; z-index: 0; border-radius: var(--radius); padding: 32px 24px; }
+  .kit-stage .toast-stack { position: static; width: 100%; max-width: 380px; }
+  .kit-login { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .kit-screen-head { max-width: 1264px; margin: 0 auto; padding: 64px 32px 20px; scroll-margin-top: 80px; }
+  .kit-screen-head p { margin-top: 8px; color: var(--text-muted); font-size: var(--fs-15); max-width: 86ch; }
+  .kit-screen { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .kit-screen .app { min-height: 900px; }
+  .kit-screen .sidebar { position: relative; height: auto; }
+  .kit-screen .topbar { position: static; }
+  .kit-screen .table--sticky thead th { position: static; }
+  .kit-footer { max-width: 1264px; margin: 0 auto; padding: 32px; color: var(--text-muted); font-size: var(--fs-13); }
+  @media (max-width: 959px) { .kit-row { grid-template-columns: 1fr; gap: 8px; } }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20h-5.5v-6h-5v6H4z"/></symbol><symbol id="i-approve" viewBox="0 0 24 24"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/><path d="m9 14 2 2 4-4.5"/></symbol><symbol id="i-order" viewBox="0 0 24 24"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 16h6"/></symbol><symbol id="i-task" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="m8.5 12 2.5 2.5 4.5-5"/></symbol><symbol id="i-report" viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 20v-7M12 20V5M17 20v-10"/></symbol><symbol id="i-admin" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol><symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5h4"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7"/></symbol><symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol><symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol><symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol><symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol><symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7.5 11 12 15.5 16.5 11"/><path d="M5 19.5h14"/></symbol><symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V5M7.5 9 12 4.5 16.5 9"/><path d="M5 19.5h14"/></symbol><symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/></symbol><symbol id="i-external" viewBox="0 0 24 24"><path d="M13 5h6v6"/><path d="M19 5 10.5 13.5"/><path d="M17 14v5H5V7h5"/></symbol><symbol id="i-refresh" viewBox="0 0 24 24"><path d="M19 12a7 7 0 1 1-2.2-5.1"/><path d="M19 4.5V8h-3.5"/></symbol><symbol id="i-return" viewBox="0 0 24 24"><path d="M9 7 4.5 11.5 9 16"/><path d="M4.5 11.5H14a5.5 5.5 0 0 1 0 11h-2" transform="translate(0 -3)"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4 21 19.5H3z"/><path d="M12 10v4.5M12 17v.2"/></symbol><symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8v.2"/></symbol><symbol id="i-more" viewBox="0 0 24 24"><circle cx="5.5" cy="12" r=".9"/><circle cx="12" cy="12" r=".9"/><circle cx="18.5" cy="12" r=".9"/></symbol><symbol id="i-calendar" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></symbol><symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol><symbol id="i-parallel" viewBox="0 0 24 24"><path d="M4 12h4M16 12h4"/><path d="M8 12c2 0 2-5 4-5h4M8 12c2 0 2 5 4 5h4"/></symbol><symbol id="i-inbox" viewBox="0 0 24 24"><path d="M4 13 6.5 5h11L20 13v6H4z"/><path d="M4 13h5l1 2.5h4l1-2.5h5"/></symbol><symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></symbol><symbol id="i-sort" viewBox="0 0 24 24"><path d="M8 5v14M4.5 15.5 8 19l3.5-3.5M16 19V5M12.5 8.5 16 5l3.5 3.5"/></symbol><symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3A4 4 0 0 0 11 18.7l1-1"/></symbol></defs></svg>
+<header class="kit-header">
+  <h1 class="h1">Дизайн-система «Документооборот»</h1>
+  <p>Витрина компонентов и три собранных экрана. Страница статическая: подключает web/src/styles/tokens.css и web/src/styles/ui.css и ничего не собирает. Описание экранов и справочник классов — в docs/03-ux.md.</p>
+</header>
+<nav class="kit-nav" aria-label="Разделы витрины"><div class="kit-nav__inner"><a href="#colors">Цвета</a><a href="#type">Типографика</a><a href="#buttons">Кнопки</a><a href="#forms">Поля</a><a href="#picker">Сотрудники</a><a href="#badges">Статусы</a><a href="#cards">Карточки</a><a href="#stats">Показатели</a><a href="#tables">Таблицы</a><a href="#tabs">Вкладки</a><a href="#route">Маршрут</a><a href="#timeline">История</a><a href="#files">Файлы</a><a href="#overlays">Окна</a><a href="#notify">Уведомления</a><a href="#states">Состояния</a><a href="#login">Вход</a><a href="#screen-home">Экран: главная</a><a href="#screen-card">Экран: карточка</a><a href="#screen-list">Экран: список</a></div></nav>
+<div class="kit-main"><section class="kit-section" id="colors"><h2 class="h2">Цвета</h2><p class="kit-lead">70 % белого и светлого, 20 % графита и серого, не больше 10 % бордового. Статусные тона — приглушённые и только в метках.</p><div class="kit-swatches"><div class="kit-swatch"><span class="kit-swatch__chip" style="background:#A51F2D;border-color:transparent"></span><span class="kit-swatch__name">Бордовый</span><span class="kit-swatch__hex">#A51F2D</span></div><div class="kit-swatch"><span class="kit-swatch__chip" style="background:#7E1722;border-color:transparent"></span><span class="kit-swatch__name">Тёмный бордо</span><span class="kit-swatch__hex">#7E1722</span></div><div class="kit-swatch"><span class="kit-swatch__chip" style="background:#C9545F;border-color:transparent"></span><span class="kit-swatch__name">Светлый бордо</span><span class="kit-swatch__hex">#C9545F</span></div><div class="kit-swatch"><span class="kit-swatch__chip" style="background:#1D1D1F;border-color:transparent"></span><span class="kit-swatch__name">Графит</span><span class="kit-swatch__hex">#1D1D1F</span></div><div class="kit-swatch"><span class="kit-swatch__chip" style="background:#6E7681;border-color:transparent"></span><span class="kit-swatch__name">Стальной серый</span><span class="kit-swatch__hex">#6E7681</span></div><div class="kit-swatch"><span class="kit-swatch__chip" style="background:#A9B0B8;border-color:transparent"></span><span class="kit-swatch__name">Средний серый</span><span class="kit-swatch__hex">#A9B0B8</span></div><div class="kit-swatch"><span class="kit-swatch__chip" style="background:#EEF0F2;border-color:#E3E6E9"></span><span class="kit-swatch__name">Светло-серый</span><span class="kit-swatch__hex">#EEF0F2</span></div><div class="kit-swatch"><span class="kit-swatch__chip" style="background:#F6F7F8;border-color:#E3E6E9"></span><span class="kit-swatch__name">Фон приложения</span><span class="kit-swatch__hex">#F6F7F8</span></div><div class="kit-swatch"><span class="kit-swatch__chip" style="background:#FFFFFF;border-color:#E3E6E9"></span><span class="kit-swatch__name">Белый</span><span class="kit-swatch__hex">#FFFFFF</span></div><div class="kit-swatch"><span class="kit-swatch__chip" style="background:#2F6B4F;border-color:transparent"></span><span class="kit-swatch__name">Зелёный статусный</span><span class="kit-swatch__hex">#2F6B4F</span></div><div class="kit-swatch"><span class="kit-swatch__chip" style="background:#B5801F;border-color:transparent"></span><span class="kit-swatch__name">Янтарный статусный</span><span class="kit-swatch__hex">#B5801F</span></div></div></section><section class="kit-section" id="type"><h2 class="h2">Типографика</h2><p class="kit-lead">Inter, один шрифт на весь продукт. Текст интерфейса — не меньше 13 px, цифры в таблицах — табличные.</p><div class="kit-demo "><div class="kit-label">Заголовки и текст</div><div class="kit-box"><div class="stack">
+   <div class="h1">Заголовок страницы — 24 px, полужирный</div>
+   <div class="h2">Заголовок раздела — 20 px</div>
+   <div class="h3">Заголовок карточки — 17 px</div>
+   <div class="h4">Подзаголовок — 14 px, полужирный</div>
+   <p class="text-lg">Основной крупный текст, 15 px: описание согласования и комментарии читаются без напряжения.</p>
+   <p class="text">Основной текст, 14 px: подписи полей, строки списков, кнопки.</p>
+   <p class="text-sm text-muted">Второстепенный текст, 13 px: подсказки, даты, служебные сведения.</p>
+   <p class="text num">Табличные цифры: 18 400 000 ₽ · 12.11.2026 · 10:15</p>
+  </div></div></div></section><section class="kit-section" id="buttons"><h2 class="h2">Кнопки</h2><p class="kit-lead">На экране одна основная (бордовая) кнопка. Опасные действия — контурные и всегда с подтверждением.</p><div class="kit-demo "><div class="kit-label">Виды</div><div class="kit-box"><div class="row">
+    <button class="btn btn--primary" type="button">Запустить согласование</button>
+    <button class="btn btn--secondary" type="button">Сохранить черновик</button>
+    <button class="btn btn--ghost" type="button">Отмена</button>
+    <button class="btn btn--danger" type="button">Отклонить</button>
+    <button class="btn btn--secondary btn--icon" type="button" aria-label="Другие действия"><svg class="icon" aria-hidden="true"><use href="#i-more"/></svg></button>
+   </div></div></div><div class="kit-demo "><div class="kit-label">Размеры</div><div class="kit-box"><div class="row">
+    <button class="btn btn--primary btn--lg" type="button">Войти</button>
+    <button class="btn btn--primary" type="button"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Согласовать</button>
+    <button class="btn btn--secondary btn--sm" type="button">Рассмотреть</button>
+    <button class="btn btn--secondary btn--sm" type="button"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Скачать</button>
+   </div></div></div><div class="kit-demo "><div class="kit-label">Состояния</div><div class="kit-box"><div class="row">
+    <button class="btn btn--primary is-busy" type="button" aria-busy="true">Запускаем…</button>
+    <button class="btn btn--secondary is-busy" type="button" aria-busy="true">Сохраняем…</button>
+    <button class="btn btn--primary" type="button" disabled>Запустить согласование</button>
+    <button class="btn btn--secondary" type="button" disabled>Сохранить черновик</button>
+   </div></div></div></section><section class="kit-section" id="forms"><h2 class="h2">Поля форм</h2><p class="kit-lead">Подпись над полем, подсказка под ним. Ошибка заменяет подсказку и объясняет, что исправить.</p><div class="kit-demo "><div class="kit-label">Ввод, список, дата, текст</div><div class="kit-box"><div class="form-grid">
+    <label class="field"><span class="field__label">Название <span class="field__required" title="Обязательное поле">*</span></span>
+      <input class="input" type="text" value="GPM-калькулятор — ЖК «Северная долина», корпус 4">
+      <span class="field__hint">Подставлено из названия сделки. Можно изменить до запуска.</span></label>
+    <label class="field"><span class="field__label">Тип согласования</span>
+      <select class="select"><option>GPM-калькулятор</option><option>Другое согласование</option></select></label>
+    <label class="field"><span class="field__label">Срок согласования <span class="field__optional">— необязательно</span></span>
+      <input class="input input--date" type="date" value="2026-11-17">
+      <span class="field__hint">Участники получат напоминание за 1 день до срока.</span></label>
+    <label class="field field--error"><span class="field__label">Сделка Битрикс24 <span class="field__required">*</span></span>
+      <span class="input-group"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg><input class="input" type="text" value="https://b24.utech.local/crm/deal/4821" aria-invalid="true"></span>
+      <span class="field__error"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>Сделка не найдена. Проверьте ссылку или найдите сделку по названию.</span></label>
+    <label class="field form-grid__full"><span class="field__label">Описание <span class="field__optional">— необязательно</span></span>
+      <textarea class="textarea" rows="3">Поставка фасадного крепежа и анкерных систем для корпуса 4. Маржинальность — 23,4 %.</textarea></label>
+    <label class="field"><span class="field__label">Недоступное поле</span><input class="input" type="text" value="СГ-2026-0412" disabled></label>
+    <label class="field"><span class="field__label">Поиск</span><span class="search"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input class="input" type="search" placeholder="Номер, название или сделка"></span></label>
+   </div></div></div><div class="kit-demo "><div class="kit-label">Флажки, переключатели, выбор порядка</div><div class="kit-box"><div class="row" style="gap: var(--sp-8)">
+    <label class="checkbox"><input type="checkbox" checked><span>Сделка обязательна</span></label>
+    <label class="checkbox"><input type="checkbox"><span>Файл обязателен</span></label>
+    <label class="radio"><input type="radio" name="r1" checked><span>Все сотрудники</span></label>
+    <label class="radio"><input type="radio" name="r1"><span>Только подразделение</span></label>
+    <label class="switch"><input type="checkbox" checked><span>Учётная запись активна</span></label>
+    <div class="segmented" role="radiogroup" aria-label="Порядок согласования">
+      <button class="segmented__item is-active" type="button" role="radio" aria-checked="true">По очереди</button>
+      <button class="segmented__item" type="button" role="radio" aria-checked="false">Одновременно</button>
+    </div>
+   </div></div></div></section><section class="kit-section" id="picker"><h2 class="h2">Выбор сотрудников</h2><p class="kit-lead">Поле с метками выбранных и выпадающим списком. Поиск — по имени, должности и подразделению. При порядке «по очереди» метки нумеруются.</p><div class="kit-demo "><div class="kit-label">Поле с открытым списком</div><div class="kit-box"><div style="max-width: 560px; padding-bottom: 212px">
+    <div class="field"><span class="field__label">Согласующие <span class="field__required">*</span></span>
+     <div class="picker">
+      <div class="picker__control">
+        <span class="chip"><span class="chip__order">1</span>Игорь Белов<button class="chip__remove" type="button" aria-label="Убрать: Игорь Белов"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></span>
+        <span class="chip"><span class="chip__order">2</span>Анна Волкова<button class="chip__remove" type="button" aria-label="Убрать: Анна Волкова"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></span>
+        <input class="picker__input" type="text" value="гро" aria-label="Добавить согласующего" role="combobox" aria-expanded="true">
+      </div>
+      <div class="picker__menu" role="listbox">
+        <button class="picker__option is-active" type="button" role="option"><span class="avatar">ПГ</span><span class="picker__option-main"><span class="picker__option-name">Павел Громов</span><span class="picker__option-meta">Финансовый контролёр · Finance</span></span></button>
+        <button class="picker__option" type="button" role="option"><span class="avatar">АГ</span><span class="picker__option-main"><span class="picker__option-name">Алина Громова</span><span class="picker__option-meta">Менеджер по логистике · Logistics</span></span></button>
+        <button class="picker__option is-selected" type="button" role="option" aria-disabled="true"><span class="avatar">ИБ</span><span class="picker__option-main"><span class="picker__option-name">Игорь Белов</span><span class="picker__option-meta">Уже добавлен</span></span></button>
+        <div class="picker__empty">Показаны 3 из 3. Уточните запрос, если нужного сотрудника нет.</div>
+      </div>
+     </div>
+     <span class="field__hint">Документ пойдёт по очереди: сначала Игорь Белов, затем Анна Волкова.</span>
+    </div>
+   </div></div></div></section><section class="kit-section" id="badges"><h2 class="h2">Статусные метки и сроки</h2><p class="kit-lead">Статус читается по тексту, форме значка и тону: кольцо — не начато, круг — в работе или готово, ромб — нужно внимание, квадрат — отказ или просрочка, черта — снято.</p><div class="kit-demo "><div class="kit-label">Метки</div><div class="kit-box"><div class="kit-row"><div class="kit-row__name">Согласование</div><div class="row row--sm"><span class="badge badge--draft">Черновик</span><span class="badge badge--review">На согласовании</span><span class="badge badge--rework">На доработке</span><span class="badge badge--approved">Согласовано</span><span class="badge badge--rejected">Отклонено</span><span class="badge badge--cancelled">Отменено</span></div></div><div class="kit-row"><div class="kit-row__name">Приказ</div><div class="row row--sm"><span class="badge badge--draft">Черновик</span><span class="badge badge--review">На согласовании</span><span class="badge badge--rework">На доработке</span><span class="badge badge--signing">На утверждении</span><span class="badge badge--acquaint">На ознакомлении</span><span class="badge badge--active">Действует</span><span class="badge badge--rejected">Отклонён</span><span class="badge badge--cancelled">Отменён</span><span class="badge badge--archived">В архиве</span></div></div><div class="kit-row"><div class="kit-row__name">Поручение</div><div class="row row--sm"><span class="badge badge--new">Новое</span><span class="badge badge--work">В работе</span><span class="badge badge--check">На проверке</span><span class="badge badge--done">Выполнено</span><span class="badge badge--cancelled">Отменено</span></div></div><div class="kit-row"><div class="kit-row__name">Срок и синхронизация</div><div class="row row--sm"><span class="badge badge--overdue">Просрочено на 3 дня</span><span class="badge badge--sync-ok">Статус передан</span><span class="badge badge--sync-pending">Ожидает отправки</span><span class="badge badge--sync-error">Ошибка передачи</span></div></div></div></div><div class="kit-demo "><div class="kit-label">Сроки</div><div class="kit-box"><div class="row" style="gap: var(--sp-8)"><span class="due" title="19 ноября 2026, 18:00"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Осталось 6 дней</span><span class="due due--soon" title="13 ноября 2026, 18:00"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Сегодня до 18:00</span><span class="due due--overdue" title="10 ноября 2026, 18:00"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Просрочено на 3 дня</span><span class="due due--done" title="12 ноября 2026, 11:40">Завершено 12 ноября</span><span class="type-tag">GPM-калькулятор</span><span class="version-tag">Версия 2</span></div></div></div></section><section class="kit-section" id="cards"><h2 class="h2">Карточки, панели, сообщения</h2><p class="kit-lead">Белая карточка с тонкой границей — основной контейнер. Бордовая линия слева — только у блока ожидаемого действия.</p><div class="kit-demo "><div class="kit-label">Блок ожидаемого действия</div><div class="kit-box"><div class="stack">
+    <section class="action-panel"><div class="action-panel__main"><h3 class="action-panel__title">Документ возвращён вам на доработку</h3><p class="action-panel__text">Павел Громов, Finance: «В расчёте не учтена доставка до объекта. Уточните ставку логистики и пересчитайте маржинальность».</p></div>
+     <div class="action-panel__actions"><button class="btn btn--secondary" type="button"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>Загрузить новую версию</button><button class="btn btn--primary" type="button">Запустить повторно</button></div></section>
+    <section class="action-panel action-panel--calm"><div class="action-panel__main"><h3 class="action-panel__title">От вас ничего не требуется</h3><p class="action-panel__text">Документ у Павла Громова с 11 ноября. Вы узнаете о решении из уведомления.</p></div></section>
+   </div></div></div><div class="kit-demo "><div class="kit-label">Сообщения в потоке страницы</div><div class="kit-box"><div class="stack stack--sm">
+    <div class="alert alert--info"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg><div class="alert__body">Согласование начнётся заново для всех согласующих — решения по версии 1 останутся в истории.</div></div>
+    <div class="alert alert--warning"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><div class="alert__body"><div class="alert__title">Срок истекает сегодня в 18:00</div>Двое согласующих ещё не приняли решение.</div></div>
+    <div class="alert alert--danger"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><div class="alert__body"><div class="alert__title">Статус не передан в Битрикс24</div>Сервер Битрикс24 не ответил. Согласование сохранено и продолжается, статус в сделке устарел.</div><div class="alert__actions"><button class="btn btn--secondary btn--sm" type="button"><svg class="icon" aria-hidden="true"><use href="#i-refresh"/></svg>Повторить передачу</button></div></div>
+    <div class="alert alert--success"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><div class="alert__body">Все согласующие приняли положительное решение 12 ноября в 11:40.</div></div>
+   </div></div></div><div class="kit-demo "><div class="kit-label">Карточка и панель готовности к запуску</div><div class="kit-box"><div class="grid-2">
+    <section class="card"><header class="card__header"><h3 class="card__title">Сведения</h3><button class="btn btn--ghost btn--sm" type="button">Изменить</button></header>
+     <div class="card__body"><dl class="dl"><dt class="dl__term">Номер</dt><dd class="dl__value num">ПР-2026-0091</dd><dt class="dl__term">Утверждающий</dt><dd class="dl__value">Виктор Лебедев, генеральный директор</dd><dt class="dl__term">Ознакомление</dt><dd class="dl__value">42 сотрудника, срок — 18 ноября</dd></dl></div>
+     <footer class="card__footer"><span class="text-sm text-muted">Изменено 11 ноября, 09:30</span></footer></section>
+    <section class="card"><header class="card__header"><h3 class="card__title">Готовность к запуску</h3><span class="text-sm text-muted num">3 из 4</span></header>
+     <div class="card__body stack">
+      <div class="progress" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" aria-label="Заполнено 3 из 4 обязательных пунктов"><div class="progress__bar" style="width: 75%"></div></div>
+      <div class="checklist">
+       <button class="checklist__item is-done" type="button"><span class="checklist__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="checklist__text">Название</span></button>
+       <button class="checklist__item is-done" type="button"><span class="checklist__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="checklist__text">Сделка Битрикс24<span class="checklist__note">Сделка № 48215</span></span></button>
+       <button class="checklist__item is-missing" type="button"><span class="checklist__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="checklist__text">Excel-файл GPM-калькулятора<span class="checklist__note">Прикрепите файл XLSX или XLS</span></span></button>
+       <button class="checklist__item is-done" type="button"><span class="checklist__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="checklist__text">Согласующие<span class="checklist__note">Выбрано 4, по очереди</span></span></button>
+       <button class="checklist__item is-optional" type="button"><span class="checklist__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="checklist__text">Срок<span class="checklist__note">Необязательно. Без срока не будет напоминаний</span></span></button>
+      </div>
+      <button class="btn btn--primary btn--block" type="button" disabled>Запустить согласование</button>
+      <p class="text-sm text-muted">Осталось прикрепить Excel-файл. Черновик сохранён в 14:02.</p>
+     </div></section>
+   </div></div></div></section><section class="kit-section" id="stats"><h2 class="h2">Показатели</h2><p class="kit-lead">Плитка — это ссылка на список. Бордовая цифра — только у показателя, требующего немедленного внимания.</p><div class="kit-demo "><div class="kit-label">Плитки</div><div class="kit-box"><div class="stats">
+    <a class="stat" href="#"><span class="stat__value">27</span><span class="stat__label">Согласования в работе</span><span class="stat__hint">+4 за неделю</span></a>
+    <a class="stat is-active" href="#"><span class="stat__value">6</span><span class="stat__label">Документы на доработке</span><span class="stat__hint">выбрано</span></a>
+    <a class="stat stat--accent" href="#"><span class="stat__value">5</span><span class="stat__label">С нарушенным сроком</span><span class="stat__hint">самая долгая просрочка — 6 дней</span></a>
+    <a class="stat stat--zero" href="#"><span class="stat__value">0</span><span class="stat__label">Просроченные поручения</span><span class="stat__hint">всё в срок</span></a>
+   </div></div></div></section><section class="kit-section" id="tables"><h2 class="h2">Таблицы</h2><p class="kit-lead">Плотная таблица с закреплённой шапкой. Строка целиком ведёт в карточку; при наведении подсвечивается.</p><div class="kit-demo "><div class="kit-label">Плотная таблица: ознакомление с приказом</div><div class="kit-box"><div class="table-wrap table-wrap--scroll" style="max-height: 252px">
+    <table class="table table--dense table--sticky table--clickable">
+     <thead><tr><th scope="col">Сотрудник</th><th scope="col">Подразделение</th><th scope="col">Состояние</th><th scope="col">Когда</th><th scope="col" class="td-num">Версия</th></tr></thead>
+     <tbody>
+      <tr><td>Алексей Морозов</td><td>Logistics</td><td><span class="badge badge--done">Ознакомлен</span></td><td class="td-nowrap">11 ноября 2026, 09:14</td><td class="td-num">2</td></tr>
+      <tr><td>Вера Данилова</td><td>Logistics</td><td><span class="badge badge--done">Ознакомлена</span></td><td class="td-nowrap">11 ноября 2026, 10:02</td><td class="td-num">2</td></tr>
+      <tr class="is-overdue"><td>Григорий Панин</td><td>Sales</td><td><span class="badge badge--overdue">Не ознакомлен</span></td><td class="td-nowrap td-muted">срок прошёл 2 дня назад</td><td class="td-num td-muted">—</td></tr>
+      <tr><td>Дарья Щербакова</td><td>Customer Service</td><td><span class="badge badge--neutral">Не ознакомлена</span></td><td class="td-nowrap td-muted">осталось 5 дней</td><td class="td-num td-muted">—</td></tr>
+      <tr><td>Евгений Корнилов</td><td>Services</td><td><span class="badge badge--done">Ознакомлен</span></td><td class="td-nowrap">12 ноября 2026, 08:47</td><td class="td-num">2</td></tr>
+      <tr><td>Жанна Титова</td><td>Finance</td><td><span class="badge badge--done">Ознакомлена</span></td><td class="td-nowrap">12 ноября 2026, 13:20</td><td class="td-num">2</td></tr>
+      <tr><td>Захар Ильин</td><td>Engineering</td><td><span class="badge badge--neutral">Не ознакомлен</span></td><td class="td-nowrap td-muted">осталось 5 дней</td><td class="td-num td-muted">—</td></tr>
+     </tbody>
+    </table></div></div></div></section><section class="kit-section" id="tabs"><h2 class="h2">Вкладки и разбивка на страницы</h2><p class="kit-lead">Вкладки переключают представления одного списка; счётчик показывает, сколько записей внутри.</p><div class="kit-demo "><div class="kit-label">Вкладки</div><div class="kit-box"><div class="tabs" role="tablist"><button class="tab is-active" type="button" role="tab" aria-selected="true">Все доступные <span class="tab__count">64</span></button><button class="tab" type="button" role="tab">Ждут моего решения <span class="tab__count">3</span></button><button class="tab" type="button" role="tab">Созданные мной <span class="tab__count">14</span></button><button class="tab" type="button" role="tab">Я наблюдатель</button></div></div></div><div class="kit-demo "><div class="kit-label">Страницы</div><div class="kit-box"><div class="pagination" style="border: 0; padding: 0"><span class="pagination__info">26–50 из 164</span><div class="pagination__pages"><button class="page-btn" type="button" aria-label="Предыдущая страница"><svg class="icon" aria-hidden="true"><use href="#i-chevron-left"/></svg></button><button class="page-btn" type="button">1</button><button class="page-btn is-current" type="button" aria-current="page">2</button><button class="page-btn" type="button">3</button><span class="pagination__gap">…</span><button class="page-btn" type="button">7</button><button class="page-btn" type="button" aria-label="Следующая страница"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></button></div><label class="pagination__size">На странице <select class="select select--sm" style="width: 76px"><option>25</option></select></label></div></div></div></section><section class="kit-section" id="route"><h2 class="h2">Маршрут согласования</h2><p class="kit-lead">Последовательные шаги и параллельная группа. У каждого участника — решение, дата и версия файла, по которой оно принято.</p><div class="grid-2"><div class="kit-demo "><div class="kit-label">Одновременно: параллельная группа</div><div class="kit-box"><ol class="route">
+    <li class="route__group">
+      <span class="route__marker"><svg class="icon" aria-hidden="true"><use href="#i-parallel"/></svg></span>
+      <div class="route__group-box">
+        <div class="route__group-title"><span>Согласуют одновременно — нужны решения всех</span><span class="num">1 из 3</span></div>
+        <div class="route__member route__step--done"><span class="route__marker"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><div class="route__body"><div class="route__name">Павел Громов</div><div class="route__meta">Finance · 12 ноября, 09:40 · по версии 2</div></div><span class="badge badge--approved">Согласовано</span></div>
+        <div class="route__member route__step--current"><span class="route__marker"></span><div class="route__body"><div class="route__name">Елена Соколова</div><div class="route__meta">Юридический отдел · документ у неё 2 дня</div></div><span class="badge badge--review">Ожидается решение</span></div>
+        <div class="route__member route__step--current"><span class="route__marker"></span><div class="route__body"><div class="route__name">Тимур Асанов</div><div class="route__meta">Security · документ у него 2 дня</div></div><span class="badge badge--review">Ожидается решение</span></div>
+      </div>
+    </li>
+   </ol></div></div><div class="kit-demo "><div class="kit-label">По очереди: возврат и отклонение</div><div class="kit-box"><ol class="route">
+    <li class="route__step route__step--done"><span class="route__marker"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><div class="route__body"><div class="route__head"><span class="route__name">Игорь Белов</span><span class="badge badge--approved">Согласовано</span></div><div class="route__meta">Коммерческий директор · 6 ноября, 14:40 · по версии 1</div></div></li>
+    <li class="route__step route__step--rework"><span class="route__marker"><svg class="icon" aria-hidden="true"><use href="#i-return"/></svg></span><div class="route__body"><div class="route__head"><span class="route__name">Павел Громов</span><span class="badge badge--rework">Вернул на доработку</span></div><div class="route__meta">Finance · 9 ноября, 15:30 · по версии 1</div><div class="route__comment"><span class="route__comment-label">Замечание</span>В расчёте не учтена доставка до объекта. Уточните ставку логистики.</div></div></li>
+    <li class="route__step route__step--rejected"><span class="route__marker"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></span><div class="route__body"><div class="route__head"><span class="route__name">Елена Соколова</span><span class="badge badge--rejected">Отклонено</span></div><div class="route__meta">Юридический отдел · пример состояния</div></div></li>
+    <li class="route__step route__step--skipped"><span class="route__marker">4</span><div class="route__body"><div class="route__head"><span class="route__name">Тимур Асанов</span></div><div class="route__meta">Заменён на Олега Тарасова 8 ноября · причина: отпуск</div></div></li>
+   </ol></div></div></div></section><section class="kit-section" id="timeline"><h2 class="h2">Лента истории</h2><p class="kit-lead">Новые записи сверху. Системные записи приглушены, решения отмечены формой и тоном точки.</p><div class="kit-demo "><div class="kit-label">Лента</div><div class="kit-box"><ol class="timeline" style="max-width: 720px">
+    <li class="timeline__item timeline__item--danger"><span class="timeline__dot"></span><div><div class="timeline__head"><span class="timeline__text"><span class="timeline__actor">Елена Соколова</span> отклонила согласование</span><time class="timeline__time">13 ноября, 09:05</time></div><div class="timeline__comment">Условия неустойки противоречат типовому договору. Нужна новая редакция пункта 7.2.</div></div></li>
+    <li class="timeline__item timeline__item--system"><span class="timeline__dot"></span><div><div class="timeline__head"><span class="timeline__text">Система не смогла передать статус в Битрикс24 — попытка 2 из 5</span><time class="timeline__time">12 ноября, 18:31</time></div></div></li>
+    <li class="timeline__item timeline__item--attention"><span class="timeline__dot"></span><div><div class="timeline__head"><span class="timeline__text"><span class="timeline__actor">Павел Громов</span> вернул на доработку</span><time class="timeline__time">9 ноября, 15:30</time></div></div></li>
+    <li class="timeline__item timeline__item--success"><span class="timeline__dot"></span><div><div class="timeline__head"><span class="timeline__text"><span class="timeline__actor">Игорь Белов</span> согласовал версию 1</span><time class="timeline__time">6 ноября, 14:40</time></div></div></li>
+    <li class="timeline__item"><span class="timeline__dot"></span><div><div class="timeline__head"><span class="timeline__text"><span class="timeline__actor">Ольга Маркова</span> заменила согласующего: Тимур Асанов → Олег Тарасов. Причина: отпуск</span><time class="timeline__time">6 ноября, 12:10</time></div></div></li>
+   </ol></div></div></section><section class="kit-section" id="files"><h2 class="h2">Файлы</h2><p class="kit-lead">Файл на согласовании нельзя заменить незаметно: новая версия появляется отдельной строкой, прежние остаются доступными.</p><div class="grid-2"><div class="kit-demo "><div class="kit-label">Зона загрузки</div><div class="kit-box"><div class="stack">
+    <div class="dropzone" role="button" tabindex="0"><svg class="icon icon--lg dropzone__icon" aria-hidden="true"><use href="#i-upload"/></svg><div class="dropzone__title">Перетащите Excel-файл GPM-калькулятора или выберите на компьютере</div><div class="dropzone__hint">XLSX или XLS, до 25 МБ</div></div>
+    <div class="dropzone dropzone--compact" role="button" tabindex="0"><svg class="icon dropzone__icon" aria-hidden="true"><use href="#i-plus"/></svg><div><div class="dropzone__title">Добавить приложения</div><div class="dropzone__hint">XLSX, XLS, DOCX, DOC, PDF, JPG, PNG — до 25 МБ каждый</div></div></div>
+    <div class="dropzone dropzone--compact dropzone--error" role="button" tabindex="0"><svg class="icon icon--brand" aria-hidden="true"><use href="#i-alert"/></svg><div><div class="dropzone__title">Файл «Расчёт.pdf» не подходит</div><div class="dropzone__hint">Для GPM-калькулятора нужен файл Excel: XLSX или XLS.</div></div></div>
+   </div></div></div><div class="kit-demo "><div class="kit-label">Строка файла: загрузка и версии</div><div class="kit-box"><ul class="files">
+    <li class="file file--uploading"><div class="file__row"><span class="file__icon" aria-hidden="true">XLSX</span><div class="file__main"><div class="file__name"><span>GPM_Металлист_линия_2.xlsx</span></div><div class="file__meta">Загружается — 62 %</div><div class="progress file__progress"><div class="progress__bar" style="width: 62%"></div></div></div><div class="file__actions"><button class="btn btn--ghost btn--sm" type="button">Отменить</button></div></div></li>
+    <li class="file"><div class="file__row"><span class="file__icon" aria-hidden="true">XLSX</span><div class="file__main"><div class="file__name"><a href="#">GPM_Восток_склад.xlsx</a><span class="version-tag">Версия 2</span></div><div class="file__meta">Основной файл · 212 КБ · Анна Волкова · 13 ноября, 10:02</div></div><div class="file__actions"><button class="btn btn--ghost btn--sm btn--icon" type="button" aria-label="Скачать"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg></button><button class="btn btn--secondary btn--sm" type="button"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>Новая версия</button></div></div>
+     <ul class="file__versions"><li class="file-version is-current"><span class="file-version__label">Версия 2</span><span class="file-version__meta">13 ноября, 10:02 · ещё не отправлена</span><span class="text-sm text-muted">текущая</span></li><li class="file-version"><span class="file-version__label">Версия 1</span><span class="file-version__meta">2 ноября, 12:15 · возвращена на доработку</span><button class="btn btn--ghost btn--sm" type="button">Скачать</button></li></ul></li>
+   </ul></div></div></div></section><section class="kit-section" id="overlays"><h2 class="h2">Окна, диалоги, всплывающие сообщения</h2><p class="kit-lead">Опасное действие подтверждается в диалоге с обязательным комментарием. Кнопка подтверждения называет само действие.</p><div class="grid-2"><div class="kit-demo "><div class="kit-label">Диалог подтверждения с комментарием</div><div class="kit-box"><div class="kit-stage"><div class="modal-backdrop"><div class="modal modal--sm" role="dialog" aria-modal="true" aria-labelledby="m1">
+    <div class="modal__header"><h3 class="modal__title" id="m1">Отклонить согласование?</h3><button class="icon-btn icon-btn--sm modal__close" type="button" aria-label="Закрыть"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+    <div class="modal__body"><p>Процесс завершится со статусом «Отклонено». Инициатор Дмитрий Орлов получит уведомление с вашим комментарием.</p>
+     <label class="field field--error"><span class="field__label">Причина отклонения <span class="field__required">*</span></span><textarea class="textarea" rows="3" aria-invalid="true"></textarea><span class="field__error"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>Напишите причину — без неё отклонить нельзя.</span></label></div>
+    <div class="modal__footer"><button class="btn btn--ghost" type="button">Не отклонять</button><button class="btn btn--primary" type="button">Отклонить согласование</button></div>
+   </div></div></div></div></div><div class="kit-demo "><div class="kit-label">Окно с формой</div><div class="kit-box"><div class="kit-stage"><div class="modal-backdrop"><div class="modal modal--sm" role="dialog" aria-modal="true" aria-labelledby="m2">
+    <div class="modal__header"><h3 class="modal__title" id="m2">Заменить согласующего</h3><button class="icon-btn icon-btn--sm modal__close" type="button" aria-label="Закрыть"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+    <div class="modal__body"><label class="field"><span class="field__label">Кого заменить</span><select class="select"><option>Тимур Асанов — Security</option></select></label>
+     <label class="field"><span class="field__label">На кого</span><select class="select"><option>Олег Тарасов — Finance</option></select></label>
+     <label class="field"><span class="field__label">Причина замены <span class="field__required">*</span></span><input class="input" type="text" value="Отпуск до 24 ноября"><span class="field__hint">Причина попадёт в историю согласования.</span></label></div>
+    <div class="modal__footer"><button class="btn btn--ghost" type="button">Отмена</button><button class="btn btn--primary" type="button">Заменить</button></div>
+   </div></div></div></div></div></div><div class="grid-2"><div class="kit-demo "><div class="kit-label">Всплывающие сообщения</div><div class="kit-box"><div class="kit-stage"><div class="toast-stack">
+    <div class="toast toast--success" role="status"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><div class="toast__body"><div class="toast__title">Согласование запущено</div><div class="toast__text">Документ получил Игорь Белов.</div></div><button class="toast__close" type="button" aria-label="Закрыть"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+    <div class="toast toast--error" role="alert"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><div class="toast__body"><div class="toast__title">Не удалось сохранить решение</div><div class="toast__text">Нет связи с сервером. <button class="toast__action" type="button">Повторить</button></div></div><button class="toast__close" type="button" aria-label="Закрыть"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+    <div class="toast" role="status"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg><div class="toast__body"><div class="toast__text" style="color: #fff">Черновик сохранён.</div></div><button class="toast__close" type="button" aria-label="Закрыть"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+   </div></div></div></div><div class="kit-demo "><div class="kit-label">Меню действий</div><div class="kit-box"><div style="position: relative; height: 172px"><div class="menu" style="position: static; display: inline-block">
+    <button class="menu__item" type="button"><svg class="icon" aria-hidden="true"><use href="#i-admin"/></svg>Изменить маршрут</button>
+    <button class="menu__item" type="button"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg>Скопировать ссылку</button>
+    <button class="menu__item" type="button"><svg class="icon" aria-hidden="true"><use href="#i-refresh"/></svg>Повторить передачу в Битрикс24</button>
+    <div class="menu__divider"></div>
+    <button class="menu__item menu__item--danger" type="button">Отменить согласование</button>
+   </div></div></div></div></div></section><section class="kit-section" id="notify"><h2 class="h2">Уведомления</h2><p class="kit-lead">Панель открывается из колокольчика. Нажатие на уведомление ведёт сразу в нужную карточку.</p><div class="grid-2"><div class="kit-demo "><div class="kit-label">Панель уведомлений</div><div class="kit-box"><div class="notify-panel">
+    <div class="notify-panel__header"><span class="notify-panel__title">Уведомления</span><button class="btn btn--ghost btn--sm" type="button">Отметить все прочитанными</button></div>
+    <div class="notify-panel__list">
+     <a class="notify notify--unread" href="#"><svg class="icon" aria-hidden="true"><use href="#i-approve"/></svg><div><div class="notify__title">Вам поступило согласование: «GPM-калькулятор — ЖК «Северная долина», корпус 4»</div><div class="notify__meta">Дмитрий Орлов · 2 часа назад</div></div></a>
+     <a class="notify notify--unread" href="#"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><div><div class="notify__title">Просрочено поручение «Подготовить коммерческое предложение для АО «Трансмост»»</div><div class="notify__meta">Срок был 10 ноября · вчера, 18:00</div></div></a>
+     <a class="notify" href="#"><svg class="icon" aria-hidden="true"><use href="#i-return"/></svg><div><div class="notify__title">Павел Громов вернул на доработку «GPM-калькулятор — логистический центр «Восток»»</div><div class="notify__meta">9 ноября, 15:30</div></div></a>
+     <a class="notify" href="#"><svg class="icon" aria-hidden="true"><use href="#i-order"/></svg><div><div class="notify__title">Ознакомьтесь с приказом № 89 «О графике работы в праздничные дни»</div><div class="notify__meta">11 ноября, 12:00</div></div></a>
+    </div>
+    <div class="notify-panel__footer"><a class="btn btn--ghost btn--sm" href="#">Все уведомления</a></div>
+   </div></div></div><div class="kit-demo "><div class="kit-label">Пустая панель</div><div class="kit-box"><div class="notify-panel"><div class="notify-panel__header"><span class="notify-panel__title">Уведомления</span></div>
+    <div class="empty"><span class="empty__icon"><svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg></span><div class="empty__title">Новых уведомлений нет</div><p class="empty__text">Здесь появятся новые согласования, поручения и напоминания о сроках.</p></div></div></div></div></div></section><section class="kit-section" id="states"><h2 class="h2">Пустые состояния и загрузка</h2><p class="kit-lead">Пустое состояние объясняет, почему пусто и что сделать дальше. Скелетон повторяет форму будущего содержимого.</p><div class="grid-3"><div class="kit-demo "><div class="kit-label">Нет дел</div><div class="kit-box"><div class="empty"><span class="empty__icon"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><div class="empty__title">От вас ничего не ждут</div><p class="empty__text">Новые согласования и поручения появятся здесь и в уведомлениях.</p></div></div></div><div class="kit-demo "><div class="kit-label">Ничего не найдено</div><div class="kit-box"><div class="empty"><span class="empty__icon"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg></span><div class="empty__title">По вашему запросу ничего не найдено</div><p class="empty__text">Проверьте номер или название либо сбросьте фильтры.</p><div class="empty__actions"><button class="btn btn--secondary btn--sm" type="button">Сбросить фильтры</button></div></div></div></div><div class="kit-demo "><div class="kit-label">Ошибка загрузки</div><div class="kit-box"><div class="empty"><span class="empty__icon"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg></span><div class="empty__title">Не удалось загрузить список</div><p class="empty__text">Проверьте подключение к сети и попробуйте ещё раз.</p><div class="empty__actions"><button class="btn btn--secondary btn--sm" type="button"><svg class="icon" aria-hidden="true"><use href="#i-refresh"/></svg>Повторить</button></div></div></div></div></div><div class="kit-demo "><div class="kit-label">Скелетоны</div><div class="kit-box"><div class="grid-2"><div class="stack"><span class="skeleton skeleton--title"></span><span class="skeleton skeleton--text" style="width: 92%"></span><span class="skeleton skeleton--text" style="width: 78%"></span><div class="row"><span class="skeleton skeleton--avatar"></span><span class="skeleton skeleton--badge"></span></div></div>
+   <div class="stack stack--sm"><span class="skeleton skeleton--row"></span><span class="skeleton skeleton--row"></span><span class="skeleton skeleton--row"></span></div></div></div></div></section><section class="kit-section" id="login"><h2 class="h2">Вход</h2><p class="kit-lead">Логотип — только оригинальный файл, на белом фоне, без изменений. Инженерная сетка видна только на общем фоне.</p><div class="kit-login"><div class="login" style="min-height: 560px">
+   <form class="login__card">
+     <div class="login__brand"><img class="login__logo" src="../web/public/brand/utech-logo.jpg" alt="UTECH" width="238" height="52"><span class="login__product">Документооборот</span></div>
+     <h3 class="login__title">Вход в систему</h3>
+     <p class="login__lead">Используйте рабочую учётную запись.</p>
+     <div class="stack">
+       <label class="field"><span class="field__label">Логин</span><input class="input input--lg" type="text" value="a.volkova" autocomplete="username"></label>
+       <label class="field"><span class="field__label">Пароль</span><input class="input input--lg" type="password" value="password" autocomplete="current-password"></label>
+       <button class="btn btn--primary btn--lg btn--block" type="button">Войти</button>
+     </div>
+     <p class="login__footer">Забыли пароль? Обратитесь к администратору системы — он сбросит пароль.</p>
+   </form></div></div></section></div>
+<div class="kit-screen-head" id="screen-home"><h2 class="h2">Экран «Главная — мои действия»</h2><p>За пять секунд видно, сколько действий ждут сотрудника и какие из них просрочены. Единственная бордовая кнопка — «Создать».</p></div><div class="kit-screen">
+<div class="app">
+  <aside class="sidebar" aria-label="Главное меню">
+    <a class="brand" href="#" aria-label="Документооборот UTECH — на главную">
+      <img class="brand__logo" src="../web/public/brand/utech-logo.jpg" alt="UTECH" width="183" height="40">
+      <span class="brand__name">Документооборот</span>
+    </a>
+    <nav class="nav"><a class="nav__item is-active" href="#" aria-current="page" title="Главная"><svg class="icon nav__icon" aria-hidden="true"><use href="#i-home"/></svg><span class="nav__label">Главная</span><span class="nav__count" title="Ждут вашего действия">7</span></a><a class="nav__item" href="#" title="Согласования"><svg class="icon nav__icon" aria-hidden="true"><use href="#i-approve"/></svg><span class="nav__label">Согласования</span><span class="nav__count" title="Ждут вашего действия">3</span></a><a class="nav__item" href="#" title="Приказы"><svg class="icon nav__icon" aria-hidden="true"><use href="#i-order"/></svg><span class="nav__label">Приказы</span><span class="nav__count" title="Ждут вашего действия">2</span></a><a class="nav__item" href="#" title="Поручения"><svg class="icon nav__icon" aria-hidden="true"><use href="#i-task"/></svg><span class="nav__label">Поручения</span><span class="nav__count" title="Ждут вашего действия">3</span></a><a class="nav__item" href="#" title="Отчёты"><svg class="icon nav__icon" aria-hidden="true"><use href="#i-report"/></svg><span class="nav__label">Отчёты</span></a><a class="nav__item" href="#" title="Администрирование"><svg class="icon nav__icon" aria-hidden="true"><use href="#i-admin"/></svg><span class="nav__label">Администрирование</span></a></nav>
+    <div class="sidebar__footer">Тестовая модель · версия 0.1</div>
+  </aside>
+  <div class="app__main">
+    <header class="topbar">
+      <button class="icon-btn topbar__menu" type="button" aria-label="Открыть меню"><svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg></button>
+      <img class="topbar__brand" src="../web/public/brand/utech-logo.jpg" alt="UTECH" width="165" height="36">
+      <label class="search topbar__search">
+        <span class="visually-hidden">Поиск по документам</span>
+        <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+        <input class="input" type="search" placeholder="Номер, название или сделка">
+      </label>
+      <div class="topbar__actions">
+        <button class="icon-btn" type="button" aria-label="Уведомления: 4 непрочитанных"><svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg><span class="icon-btn__count">4</span></button>
+        <button class="user-menu" type="button" aria-label="Профиль">
+          <span class="avatar">АВ</span>
+          <span class="user-menu__text"><span class="user-menu__name">Анна Волкова</span><span class="user-menu__role">Sales · руководитель отдела</span></span>
+          <svg class="icon icon--sm icon--muted" aria-hidden="true"><use href="#i-chevron-down"/></svg>
+        </button>
+      </div>
+    </header>
+    <main class="content">
+<div class="page__header">
+  <div class="page__heading">
+    <h1 class="page__title">Мои действия</h1>
+    <p class="page__lead">Сегодня от вас ждут 9 действий, 2 из них просрочены.</p>
+  </div>
+  <div class="page__actions">
+    <button class="btn btn--primary" type="button"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Создать<svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></button>
+  </div>
+</div>
+
+<div class="stats">
+  <a class="stat" href="#"><span class="stat__value">3</span><span class="stat__label">Ждут моего решения</span><span class="stat__hint">1 просрочено</span></a>
+  <a class="stat" href="#"><span class="stat__value">1</span><span class="stat__label">На доработке у меня</span><span class="stat__hint">возвращено 9 ноября</span></a>
+  <a class="stat" href="#"><span class="stat__value">3</span><span class="stat__label">Поручения мне</span><span class="stat__hint">1 просрочено</span></a>
+  <a class="stat" href="#"><span class="stat__value">2</span><span class="stat__label">Приказы на ознакомление</span><span class="stat__hint">ближайший срок — завтра</span></a>
+  <a class="stat stat--accent" href="#"><span class="stat__value">2</span><span class="stat__label">Просрочено</span><span class="stat__hint">требуют действия сегодня</span></a>
+</div>
+
+<div class="layout-home section">
+  <div class="stack stack--lg">
+    <section class="card" aria-labelledby="h-decide">
+      <header class="card__header">
+        <h2 class="card__title" id="h-decide">Ждут моего решения <span class="card__count">3</span></h2>
+        <a class="btn btn--ghost btn--sm" href="#">Все согласования</a>
+      </header>
+      <ul class="todo">
+        <li class="todo__item">
+  <div class="todo__main"><a class="todo__title" href="#">GPM-калькулятор — ЖК «Северная долина», корпус 4</a><div class="todo__meta"><span>СГ-2026-0412</span><span>GPM-калькулятор</span><span>Дмитрий Орлов, Sales</span></div></div>
+  <div class="todo__due"><span class="due due--overdue" title="Срок: 12 ноября 2026, 18:00"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Просрочено на 1 день</span></div>
+  <div class="todo__action"><a class="btn btn--secondary btn--sm" href="#">Рассмотреть</a></div>
+</li>
+        <li class="todo__item">
+  <div class="todo__main"><a class="todo__title" href="#">Договор поставки анкерных систем — ООО «СтройМонтаж-Урал»</a><div class="todo__meta"><span>СГ-2026-0418</span><span>Другое согласование</span><span>Марина Климова, юридический отдел</span></div></div>
+  <div class="todo__due"><span class="due" title="Срок: 15 ноября 2026, 18:00"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Осталось 2 дня</span></div>
+  <div class="todo__action"><a class="btn btn--secondary btn--sm" href="#">Рассмотреть</a></div>
+</li>
+        <li class="todo__item">
+  <div class="todo__main"><a class="todo__title" href="#">Приказ № 91 «Об утверждении прайс-листа на IV квартал»</a><div class="todo__meta"><span>ПР-2026-0091</span><span>Приказ</span><span>Олег Тарасов, Finance</span></div></div>
+  <div class="todo__due"><span class="due" title="Срок: 17 ноября 2026, 18:00"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Осталось 4 дня</span></div>
+  <div class="todo__action"><a class="btn btn--secondary btn--sm" href="#">Рассмотреть</a></div>
+</li>
+      </ul>
+    </section>
+
+    <section class="card" aria-labelledby="h-tasks">
+      <header class="card__header">
+        <h2 class="card__title" id="h-tasks">Поручения мне <span class="card__count">3</span></h2>
+        <a class="btn btn--ghost btn--sm" href="#">Все поручения</a>
+      </header>
+      <ul class="todo">
+        <li class="todo__item">
+  <div class="todo__main"><a class="todo__title" href="#">Подготовить коммерческое предложение для АО «Трансмост»</a><div class="todo__meta"><span><span class="badge badge--work">В работе</span></span><span>ПЧ-2026-0231</span><span>от Игоря Белова</span></div></div>
+  <div class="todo__due"><span class="due due--overdue" title="Срок: 10 ноября 2026, 18:00"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Просрочено на 3 дня</span></div>
+  <div class="todo__action"><a class="btn btn--secondary btn--sm" href="#">Открыть</a></div>
+</li>
+        <li class="todo__item">
+  <div class="todo__main"><a class="todo__title" href="#">Согласовать график отгрузок на декабрь с Logistics</a><div class="todo__meta"><span><span class="badge badge--work">В работе</span></span><span>ПЧ-2026-0238</span><span>по приказу № 84</span></div></div>
+  <div class="todo__due"><span class="due due--soon" title="Срок: 13 ноября 2026, 18:00"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Сегодня до 18:00</span></div>
+  <div class="todo__action"><a class="btn btn--secondary btn--sm" href="#">Открыть</a></div>
+</li>
+        <li class="todo__item">
+  <div class="todo__main"><a class="todo__title" href="#">Обновить реестр ключевых клиентов за III квартал</a><div class="todo__meta"><span><span class="badge badge--new">Новое</span></span><span>ПЧ-2026-0244</span><span>от Игоря Белова</span></div></div>
+  <div class="todo__due"><span class="due" title="Срок: 19 ноября 2026, 18:00"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Осталось 6 дней</span></div>
+  <div class="todo__action"><a class="btn btn--secondary btn--sm" href="#">Открыть</a></div>
+</li>
+      </ul>
+    </section>
+  </div>
+
+  <div class="stack stack--lg">
+    <section class="card" aria-labelledby="h-rework">
+      <header class="card__header"><h2 class="card__title" id="h-rework">На доработке у меня <span class="card__count">1</span></h2></header>
+      <ul class="todo todo--compact">
+        <li class="todo__item">
+          <div class="todo__main">
+            <a class="todo__title" href="#">GPM-калькулятор — логистический центр «Восток»</a>
+            <div class="todo__meta"><span>СГ-2026-0397</span><span>вернул Павел Громов, Finance</span></div>
+          </div>
+          <div class="todo__due"><span class="due" title="Возвращено: 9 ноября 2026, 15:30"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Возвращено 4 дня назад</span></div>
+          <div class="todo__action"><a class="btn btn--secondary btn--sm" href="#">Доработать</a></div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="card" aria-labelledby="h-acq">
+      <header class="card__header"><h2 class="card__title" id="h-acq">Приказы на ознакомление <span class="card__count">2</span></h2></header>
+      <ul class="todo todo--compact">
+        <li class="todo__item">
+          <div class="todo__main">
+            <a class="todo__title" href="#">Приказ № 86 «Об изменении регламента отгрузок»</a>
+            <div class="todo__meta"><span>утверждён 9 ноября</span></div>
+          </div>
+          <div class="todo__due"><span class="due due--soon" title="Срок ознакомления: 14 ноября 2026, 18:00"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Остался 1 день</span></div>
+          <div class="todo__action"><a class="btn btn--secondary btn--sm" href="#">Ознакомиться</a></div>
+        </li>
+        <li class="todo__item">
+          <div class="todo__main">
+            <a class="todo__title" href="#">Приказ № 89 «О графике работы в праздничные дни»</a>
+            <div class="todo__meta"><span>утверждён 11 ноября</span></div>
+          </div>
+          <div class="todo__due"><span class="due" title="Срок ознакомления: 18 ноября 2026, 18:00"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Осталось 5 дней</span></div>
+          <div class="todo__action"><a class="btn btn--secondary btn--sm" href="#">Ознакомиться</a></div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="card" aria-labelledby="h-mine">
+      <header class="card__header">
+        <h2 class="card__title" id="h-mine">Мои документы в работе <span class="card__count">3</span></h2>
+        <a class="btn btn--ghost btn--sm" href="#">Все мои</a>
+      </header>
+      <ul class="todo todo--compact">
+        <li class="todo__item">
+          <div class="todo__main"><a class="todo__title" href="#">Скидка 7 % для ООО «ПромТехСнаб»</a><div class="todo__meta"><span>ждёт Павла Громова</span></div></div>
+          <div class="todo__action"><span class="badge badge--review">На согласовании</span></div>
+        </li>
+        <li class="todo__item">
+          <div class="todo__main"><a class="todo__title" href="#">GPM-калькулятор — завод «Металлист»</a><div class="todo__meta"><span>согласовано 12 ноября</span></div></div>
+          <div class="todo__action"><span class="badge badge--approved">Согласовано</span></div>
+        </li>
+        <li class="todo__item">
+          <div class="todo__main"><a class="todo__title" href="#">Дополнительное соглашение № 3 — АО «Трансмост»</a><div class="todo__meta"><span>не запущено</span></div></div>
+          <div class="todo__action"><span class="badge badge--draft">Черновик</span></div>
+        </li>
+      </ul>
+    </section>
+  </div>
+</div>
+</main>
+  </div>
+</div></div>
+<div class="kit-screen-head" id="screen-card"><h2 class="h2">Экран «Карточка согласования GPM-калькулятора»</h2><p>Согласующий видит статус и срок рядом с названием, а ожидаемое от него действие — первым блоком. Единственная бордовая кнопка — «Согласовать».</p></div><div class="kit-screen">
+<div class="app">
+  <aside class="sidebar" aria-label="Главное меню">
+    <a class="brand" href="#" aria-label="Документооборот UTECH — на главную">
+      <img class="brand__logo" src="../web/public/brand/utech-logo.jpg" alt="UTECH" width="183" height="40">
+      <span class="brand__name">Документооборот</span>
+    </a>
+    <nav class="nav"><a class="nav__item" href="#" title="Главная"><svg class="icon nav__icon" aria-hidden="true"><use href="#i-home"/></svg><span class="nav__label">Главная</span><span class="nav__count" title="Ждут вашего действия">7</span></a><a class="nav__item is-active" href="#" aria-current="page" title="Согласования"><svg class="icon nav__icon" aria-hidden="true"><use href="#i-approve"/></svg><span class="nav__label">Согласования</span><span class="nav__count" title="Ждут вашего действия">3</span></a><a class="nav__item" href="#" title="Приказы"><svg class="icon nav__icon" aria-hidden="true"><use href="#i-order"/></svg><span class="nav__label">Приказы</span><span class="nav__count" title="Ждут вашего действия">2</span></a><a class="nav__item" href="#" title="Поручения"><svg class="icon nav__icon" aria-hidden="true"><use href="#i-task"/></svg><span class="nav__label">Поручения</span><span class="nav__count" title="Ждут вашего действия">3</span></a><a class="nav__item" href="#" title="Отчёты"><svg class="icon nav__icon" aria-hidden="true"><use href="#i-report"/></svg><span class="nav__label">Отчёты</span></a><a class="nav__item" href="#" title="Администрирование"><svg class="icon nav__icon" aria-hidden="true"><use href="#i-admin"/></svg><span class="nav__label">Администрирование</span></a></nav>
+    <div class="sidebar__footer">Тестовая модель · версия 0.1</div>
+  </aside>
+  <div class="app__main">
+    <header class="topbar">
+      <button class="icon-btn topbar__menu" type="button" aria-label="Открыть меню"><svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg></button>
+      <img class="topbar__brand" src="../web/public/brand/utech-logo.jpg" alt="UTECH" width="165" height="36">
+      <label class="search topbar__search">
+        <span class="visually-hidden">Поиск по документам</span>
+        <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+        <input class="input" type="search" placeholder="Номер, название или сделка">
+      </label>
+      <div class="topbar__actions">
+        <button class="icon-btn" type="button" aria-label="Уведомления: 4 непрочитанных"><svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg><span class="icon-btn__count">4</span></button>
+        <button class="user-menu" type="button" aria-label="Профиль">
+          <span class="avatar">АВ</span>
+          <span class="user-menu__text"><span class="user-menu__name">Анна Волкова</span><span class="user-menu__role">Sales · руководитель отдела</span></span>
+          <svg class="icon icon--sm icon--muted" aria-hidden="true"><use href="#i-chevron-down"/></svg>
+        </button>
+      </div>
+    </header>
+    <main class="content">
+<nav class="breadcrumbs" aria-label="Путь"><a href="#">Согласования</a><span class="breadcrumbs__sep">/</span><span>СГ-2026-0412</span></nav>
+<div class="page__header">
+  <div class="page__heading">
+    <div class="page__title-row">
+      <h1 class="page__title">GPM-калькулятор — ЖК «Северная долина», корпус 4</h1>
+      <span class="badge badge--review">На согласовании</span>
+      <span class="badge badge--overdue" title="Срок: 12 ноября 2026, 18:00">Просрочено на 1 день</span>
+    </div>
+    <div class="page__meta">
+      <span class="num">СГ-2026-0412</span>
+      <span>GPM-калькулятор</span>
+      <span>Инициатор: Дмитрий Орлов, Sales</span>
+      <span>Создано 6 ноября 2026</span>
+    </div>
+  </div>
+  <div class="page__actions">
+    <button class="btn btn--secondary btn--icon" type="button" aria-label="Другие действия"><svg class="icon" aria-hidden="true"><use href="#i-more"/></svg></button>
+  </div>
+</div>
+
+<div class="layout-split">
+  <div class="stack stack--lg">
+    <section class="action-panel" aria-label="Ожидаемое действие">
+      <div class="action-panel__main">
+        <h2 class="action-panel__title">Ожидается ваше решение</h2>
+        <p class="action-panel__text">Вы — второй согласующий из четырёх. Рассмотрите версию 2 файла: Дмитрий Орлов доработал её по замечанию Finance.</p>
+      </div>
+      <div class="action-panel__actions">
+        <button class="btn btn--danger" type="button">Отклонить</button>
+        <button class="btn btn--secondary" type="button">Вернуть на доработку</button>
+        <button class="btn btn--primary" type="button"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Согласовать</button>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="c-desc">
+      <header class="card__header"><h2 class="card__title" id="c-desc">Описание</h2></header>
+      <div class="card__body"><p class="text-lg">Поставка фасадного крепежа и анкерных систем для корпуса 4. По замечанию Finance обновил ставку логистики: доставка до объекта включена в расчёт, маржинальность — 23,4 %.</p></div>
+    </section>
+
+    <section class="card" aria-labelledby="c-route">
+      <header class="card__header">
+        <h2 class="card__title" id="c-route">Маршрут <span class="card__count">по очереди · 1 из 4</span></h2>
+        <div class="segmented" role="tablist" aria-label="Запуск согласования">
+          <button class="segmented__item is-active" type="button" role="tab" aria-selected="true">Запуск 2 · текущий</button>
+          <button class="segmented__item" type="button" role="tab" aria-selected="false">Запуск 1</button>
+        </div>
+      </header>
+      <div class="card__body">
+        <ol class="route">
+          <li class="route__step route__step--done">
+            <span class="route__marker"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>
+            <div class="route__body">
+              <div class="route__head"><span class="route__name">Игорь Белов</span><span class="badge badge--approved">Согласовано</span></div>
+              <div class="route__meta">Коммерческий директор · 11 ноября, 10:15 · по версии 2</div>
+            </div>
+          </li>
+          <li class="route__step route__step--current">
+            <span class="route__marker">2</span>
+            <div class="route__body">
+              <div class="route__head"><span class="route__name">Анна Волкова — это вы</span><span class="badge badge--review">Ожидается решение</span></div>
+              <div class="route__meta">Руководитель отдела продаж, Sales · документ у вас с 11 ноября, 10:15</div>
+            </div>
+          </li>
+          <li class="route__step route__step--waiting">
+            <span class="route__marker">3</span>
+            <div class="route__body">
+              <div class="route__head"><span class="route__name">Павел Громов</span></div>
+              <div class="route__meta">Финансовый контролёр, Finance · получит документ после вашего решения</div>
+            </div>
+          </li>
+          <li class="route__step route__step--waiting">
+            <span class="route__marker">4</span>
+            <div class="route__body">
+              <div class="route__head"><span class="route__name">Елена Соколова</span></div>
+              <div class="route__meta">Ведущий юрист, юридический отдел · в очереди</div>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="c-files">
+      <header class="card__header">
+        <h2 class="card__title" id="c-files">Файлы <span class="card__count">3</span></h2>
+        <button class="btn btn--ghost btn--sm" type="button"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Скачать все</button>
+      </header>
+      <div class="card__body">
+        <ul class="files">
+          <li class="file">
+            <div class="file__row">
+              <span class="file__icon" aria-hidden="true">XLSX</span>
+              <div class="file__main">
+                <div class="file__name"><a href="#">GPM_Северная_долина_корпус_4.xlsx</a><span class="version-tag">Версия 2</span></div>
+                <div class="file__meta">Основной файл · 184 КБ · Дмитрий Орлов · 10 ноября, 16:48</div>
+              </div>
+              <div class="file__actions"><button class="btn btn--secondary btn--sm" type="button"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Скачать</button></div>
+            </div>
+            <ul class="file__versions" aria-label="Версии файла">
+              <li class="file-version is-current">
+                <span class="file-version__label">Версия 2</span>
+                <span class="file-version__meta">10 ноября, 16:48 · Дмитрий Орлов · на согласовании, запуск 2</span>
+                <span class="text-sm text-muted">текущая</span>
+              </li>
+              <li class="file-version">
+                <span class="file-version__label">Версия 1</span>
+                <span class="file-version__meta">6 ноября, 11:20 · Дмитрий Орлов · возвращена на доработку, запуск 1</span>
+                <button class="btn btn--ghost btn--sm" type="button">Скачать</button>
+              </li>
+            </ul>
+          </li>
+          <li class="file">
+            <div class="file__row">
+              <span class="file__icon" aria-hidden="true">PDF</span>
+              <div class="file__main">
+                <div class="file__name"><a href="#">Спецификация_оборудования_корпус_4.pdf</a><span class="version-tag">Версия 1</span></div>
+                <div class="file__meta">Приложение · 1,2 МБ · Дмитрий Орлов · 6 ноября, 11:21</div>
+              </div>
+              <div class="file__actions"><button class="btn btn--secondary btn--sm" type="button"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Скачать</button></div>
+            </div>
+          </li>
+          <li class="file">
+            <div class="file__row">
+              <span class="file__icon" aria-hidden="true">DOCX</span>
+              <div class="file__main">
+                <div class="file__name"><a href="#">Письмо_заказчика_о_сроках_поставки.docx</a><span class="version-tag">Версия 1</span></div>
+                <div class="file__meta">Приложение · 48 КБ · Дмитрий Орлов · 6 ноября, 11:21</div>
+              </div>
+              <div class="file__actions"><button class="btn btn--secondary btn--sm" type="button"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Скачать</button></div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="c-hist">
+      <header class="card__header">
+        <h2 class="card__title" id="c-hist">История <span class="card__count">10</span></h2>
+        <label class="checkbox text-sm"><input type="checkbox" checked><span>Показывать системные записи</span></label>
+      </header>
+      <div class="card__body">
+        <div class="timeline__divider">Запуск 2 · версия 2</div>
+        <ol class="timeline">
+          <li class="timeline__item timeline__item--success"><span class="timeline__dot"></span><div><div class="timeline__head"><span class="timeline__text"><span class="timeline__actor">Игорь Белов</span> согласовал версию 2</span><time class="timeline__time">11 ноября, 10:15</time></div></div></li>
+          <li class="timeline__item timeline__item--system"><span class="timeline__dot"></span><div><div class="timeline__head"><span class="timeline__text">Система передала статус «На согласовании» в Битрикс24</span><time class="timeline__time">10 ноября, 17:05</time></div></div></li>
+          <li class="timeline__item"><span class="timeline__dot"></span><div><div class="timeline__head"><span class="timeline__text"><span class="timeline__actor">Дмитрий Орлов</span> повторно запустил согласование — для всех четырёх согласующих заново</span><time class="timeline__time">10 ноября, 17:05</time></div></div></li>
+          <li class="timeline__item"><span class="timeline__dot"></span><div><div class="timeline__head"><span class="timeline__text"><span class="timeline__actor">Дмитрий Орлов</span> загрузил версию 2 файла «GPM_Северная_долина_корпус_4.xlsx»</span><time class="timeline__time">10 ноября, 16:48</time></div></div></li>
+        </ol>
+        <div class="timeline__divider" style="margin-top: var(--sp-5)">Запуск 1 · версия 1</div>
+        <ol class="timeline">
+          <li class="timeline__item timeline__item--attention"><span class="timeline__dot"></span><div><div class="timeline__head"><span class="timeline__text"><span class="timeline__actor">Павел Громов</span> вернул на доработку</span><time class="timeline__time">9 ноября, 15:30</time></div><div class="timeline__comment">В расчёте не учтена доставка до объекта. Уточните ставку логистики и пересчитайте маржинальность.</div></div></li>
+          <li class="timeline__item timeline__item--success"><span class="timeline__dot"></span><div><div class="timeline__head"><span class="timeline__text"><span class="timeline__actor">Анна Волкова</span> согласовала версию 1</span><time class="timeline__time">7 ноября, 12:02</time></div></div></li>
+          <li class="timeline__item timeline__item--success"><span class="timeline__dot"></span><div><div class="timeline__head"><span class="timeline__text"><span class="timeline__actor">Игорь Белов</span> согласовал версию 1</span><time class="timeline__time">6 ноября, 14:40</time></div><div class="timeline__comment">Условия оплаты подтверждаю.</div></div></li>
+          <li class="timeline__item"><span class="timeline__dot"></span><div><div class="timeline__head"><span class="timeline__text"><span class="timeline__actor">Дмитрий Орлов</span> запустил согласование; запись появилась в сделке № 48215</span><time class="timeline__time">6 ноября, 11:25</time></div></div></li>
+        </ol>
+        <div style="margin-top: var(--sp-5)"><button class="btn btn--ghost btn--sm" type="button">Показать ещё 2 записи</button></div>
+        <hr class="divider" style="margin: var(--sp-5) 0">
+        <form class="comment-form">
+          <span class="avatar">АВ</span>
+          <label class="spacer"><span class="visually-hidden">Комментарий</span><textarea class="textarea" rows="1" placeholder="Комментарий увидят все участники согласования"></textarea></label>
+          <button class="btn btn--secondary" type="button">Отправить</button>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <aside class="layout-split__aside">
+    <section class="card card--compact" aria-labelledby="c-deal">
+      <header class="card__header"><h2 class="card__title" id="c-deal">Сделка Битрикс24</h2></header>
+      <div class="card__body stack">
+        <div>
+          <div class="deal__title">ЖК «Северная долина», корпус 4 — поставка фасадного крепежа</div>
+          <div class="deal__id">Сделка № 48215</div>
+        </div>
+        <dl class="dl">
+          <dt class="dl__term">Клиент</dt><dd class="dl__value">ООО «СК Северная долина»</dd>
+          <dt class="dl__term">Сумма</dt><dd class="dl__value num">18 400 000 ₽</dd>
+          <dt class="dl__term">Стадия</dt><dd class="dl__value">Согласование условий</dd>
+          <dt class="dl__term">Ответственный</dt><dd class="dl__value">Дмитрий Орлов</dd>
+        </dl>
+        <a class="btn btn--secondary btn--block" href="#">Открыть сделку в Битрикс24<svg class="icon" aria-hidden="true"><use href="#i-external"/></svg></a>
+        <hr class="divider">
+        <div class="sync">
+          <span class="badge badge--sync-ok">Статус передан</span>
+          <span class="sync__meta">10 ноября, 17:05</span>
+        </div>
+        <p class="text-sm text-muted">В сделке согласование видно среди задач со статусом «На согласовании».</p>
+      </div>
+    </section>
+
+    <section class="card card--compact" aria-labelledby="c-info">
+      <header class="card__header"><h2 class="card__title" id="c-info">Сведения</h2></header>
+      <div class="card__body">
+        <dl class="dl">
+          <dt class="dl__term">Срок</dt><dd class="dl__value"><span class="due due--overdue" title="12 ноября 2026, 18:00">12 ноября, 18:00</span></dd>
+          <dt class="dl__term">Порядок</dt><dd class="dl__value">По очереди</dd>
+          <dt class="dl__term">Инициатор</dt><dd class="dl__value">Дмитрий Орлов</dd>
+          <dt class="dl__term">Подразделение</dt><dd class="dl__value">Sales</dd>
+          <dt class="dl__term">Создано</dt><dd class="dl__value num">6 ноября 2026, 11:20</dd>
+          <dt class="dl__term">Запусков</dt><dd class="dl__value num">2</dd>
+          <dt class="dl__term">Наблюдатели</dt><dd class="dl__value"><span class="row row--sm"><span class="chip chip--static">Ольга Маркова</span><span class="chip chip--static">Сергей Ким</span></span></dd>
+        </dl>
+      </div>
+    </section>
+  </aside>
+</div>
+</main>
+  </div>
+</div></div>
+<div class="kit-screen-head" id="screen-list"><h2 class="h2">Экран «Список документов с фильтрами»</h2><p>Общий шаблон списка: вкладки-представления, фильтры из раздела 16 ТЗ, таблица с закреплённой шапкой и разбивка на страницы.</p></div><div class="kit-screen">
+<div class="app">
+  <aside class="sidebar" aria-label="Главное меню">
+    <a class="brand" href="#" aria-label="Документооборот UTECH — на главную">
+      <img class="brand__logo" src="../web/public/brand/utech-logo.jpg" alt="UTECH" width="183" height="40">
+      <span class="brand__name">Документооборот</span>
+    </a>
+    <nav class="nav"><a class="nav__item" href="#" title="Главная"><svg class="icon nav__icon" aria-hidden="true"><use href="#i-home"/></svg><span class="nav__label">Главная</span><span class="nav__count" title="Ждут вашего действия">7</span></a><a class="nav__item is-active" href="#" aria-current="page" title="Согласования"><svg class="icon nav__icon" aria-hidden="true"><use href="#i-approve"/></svg><span class="nav__label">Согласования</span><span class="nav__count" title="Ждут вашего действия">3</span></a><a class="nav__item" href="#" title="Приказы"><svg class="icon nav__icon" aria-hidden="true"><use href="#i-order"/></svg><span class="nav__label">Приказы</span><span class="nav__count" title="Ждут вашего действия">2</span></a><a class="nav__item" href="#" title="Поручения"><svg class="icon nav__icon" aria-hidden="true"><use href="#i-task"/></svg><span class="nav__label">Поручения</span><span class="nav__count" title="Ждут вашего действия">3</span></a><a class="nav__item" href="#" title="Отчёты"><svg class="icon nav__icon" aria-hidden="true"><use href="#i-report"/></svg><span class="nav__label">Отчёты</span></a><a class="nav__item" href="#" title="Администрирование"><svg class="icon nav__icon" aria-hidden="true"><use href="#i-admin"/></svg><span class="nav__label">Администрирование</span></a></nav>
+    <div class="sidebar__footer">Тестовая модель · версия 0.1</div>
+  </aside>
+  <div class="app__main">
+    <header class="topbar">
+      <button class="icon-btn topbar__menu" type="button" aria-label="Открыть меню"><svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg></button>
+      <img class="topbar__brand" src="../web/public/brand/utech-logo.jpg" alt="UTECH" width="165" height="36">
+      <label class="search topbar__search">
+        <span class="visually-hidden">Поиск по документам</span>
+        <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+        <input class="input" type="search" placeholder="Номер, название или сделка">
+      </label>
+      <div class="topbar__actions">
+        <button class="icon-btn" type="button" aria-label="Уведомления: 4 непрочитанных"><svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg><span class="icon-btn__count">4</span></button>
+        <button class="user-menu" type="button" aria-label="Профиль">
+          <span class="avatar">АВ</span>
+          <span class="user-menu__text"><span class="user-menu__name">Анна Волкова</span><span class="user-menu__role">Sales · руководитель отдела</span></span>
+          <svg class="icon icon--sm icon--muted" aria-hidden="true"><use href="#i-chevron-down"/></svg>
+        </button>
+      </div>
+    </header>
+    <main class="content">
+<div class="page__header">
+  <div class="page__heading">
+    <h1 class="page__title">Согласования</h1>
+    <p class="page__lead">Все согласования, к которым у вас есть доступ.</p>
+  </div>
+  <div class="page__actions">
+    <button class="btn btn--primary" type="button"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Создать согласование</button>
+  </div>
+</div>
+
+<div class="tabs" role="tablist" style="margin-bottom: var(--sp-5)">
+  <button class="tab is-active" type="button" role="tab" aria-selected="true">Все доступные <span class="tab__count">64</span></button>
+  <button class="tab" type="button" role="tab" aria-selected="false">Ждут моего решения <span class="tab__count">3</span></button>
+  <button class="tab" type="button" role="tab" aria-selected="false">Созданные мной <span class="tab__count">14</span></button>
+  <button class="tab" type="button" role="tab" aria-selected="false">Я наблюдатель <span class="tab__count">5</span></button>
+</div>
+
+<form class="filters" aria-label="Фильтры">
+  <div class="filters__row">
+    <label class="field"><span class="field__label">Поиск</span>
+      <span class="search"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input class="input" type="search" placeholder="Номер, название или сделка"></span></label>
+    <label class="field"><span class="field__label">Тип</span>
+      <select class="select"><option>Все типы</option><option>GPM-калькулятор</option><option>Другое согласование</option></select></label>
+    <label class="field"><span class="field__label">Статус</span>
+      <select class="select"><option>Все статусы</option><option>Черновик</option><option>На согласовании</option><option>На доработке</option><option>Согласовано</option><option>Отклонено</option><option>Отменено</option></select></label>
+    <label class="field"><span class="field__label">Подразделение</span>
+      <select class="select"><option>Все</option><option>Sales</option><option>Finance</option><option>Юридический отдел</option></select></label>
+    <label class="field"><span class="field__label">Инициатор</span>
+      <select class="select"><option>Все сотрудники</option><option>Анна Волкова</option><option>Дмитрий Орлов</option></select></label>
+    <button class="btn btn--secondary" type="button"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg>Период</button>
+  </div>
+  <div class="filters__active">
+    <span>Применено:</span>
+    <span class="filter-chip"><span class="filter-chip__key">Период:</span> 27 октября — 13 ноября 2026 <button class="chip__remove" type="button" aria-label="Убрать фильтр «Период»"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></span>
+    <span class="filter-chip"><span class="filter-chip__key">Сделка:</span> указана или нет <button class="chip__remove" type="button" aria-label="Убрать фильтр «Сделка»"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></span>
+    <button class="btn btn--ghost btn--sm" type="button">Сбросить всё</button>
+  </div>
+</form>
+
+<div class="table-wrap">
+  <table class="table table--sticky">
+    <thead><tr>
+      <th scope="col">Номер</th>
+      <th scope="col">Название и сделка</th>
+      <th scope="col" class="hide-md">Тип</th>
+      <th scope="col">Статус</th>
+      <th scope="col">Инициатор</th>
+      <th scope="col"><button class="th-sort" type="button">Срок<svg class="icon" aria-hidden="true"><use href="#i-sort"/></svg></button></th>
+      <th scope="col" class="hide-md"><button class="th-sort is-active" type="button" aria-label="Создано, сортировка: сначала новые">Создано<svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></button></th>
+    </tr></thead>
+    <tbody><tr>
+  <td class="td-nowrap td-muted">СГ-2026-0418</td>
+  <td><a class="table__title" href="#">Договор поставки анкерных систем — ООО «СтройМонтаж-Урал»</a><span class="table__sub">Сделка № 48301 · СтройМонтаж-Урал, анкерные системы</span></td>
+  <td class="td-nowrap hide-md"><span class="type-tag">Другое</span></td>
+  <td class="td-nowrap"><span class="badge badge--review">На согласовании</span></td>
+  <td class="td-nowrap">Марина Климова<span class="table__sub">Юридический отдел</span></td>
+  <td class="td-nowrap"><span class="due" title="15 ноября 2026, 18:00"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Осталось 2 дня</span></td>
+  <td class="td-nowrap td-muted hide-md">12.11.2026</td>
+</tr><tr>
+  <td class="td-nowrap td-muted">СГ-2026-0415</td>
+  <td><a class="table__title" href="#">Скидка 7 % для ООО «ПромТехСнаб»</a><span class="table__sub">Сделка № 48177 · ПромТехСнаб, годовой контракт</span></td>
+  <td class="td-nowrap hide-md"><span class="type-tag">Другое</span></td>
+  <td class="td-nowrap"><span class="badge badge--review">На согласовании</span></td>
+  <td class="td-nowrap">Анна Волкова<span class="table__sub">Sales</span></td>
+  <td class="td-nowrap"><span class="due" title="16 ноября 2026, 18:00"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Осталось 3 дня</span></td>
+  <td class="td-nowrap td-muted hide-md">11.11.2026</td>
+</tr><tr class="is-overdue">
+  <td class="td-nowrap td-muted">СГ-2026-0412</td>
+  <td><a class="table__title" href="#">GPM-калькулятор — ЖК «Северная долина», корпус 4</a><span class="table__sub">Сделка № 48215 · Северная долина, фасадный крепёж</span></td>
+  <td class="td-nowrap hide-md"><span class="type-tag">GPM-калькулятор</span></td>
+  <td class="td-nowrap"><span class="badge badge--review">На согласовании</span></td>
+  <td class="td-nowrap">Дмитрий Орлов<span class="table__sub">Sales</span></td>
+  <td class="td-nowrap"><span class="due due--overdue" title="12 ноября 2026, 18:00"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Просрочено на 1 день</span></td>
+  <td class="td-nowrap td-muted hide-md">06.11.2026</td>
+</tr><tr>
+  <td class="td-nowrap td-muted">СГ-2026-0409</td>
+  <td><a class="table__title" href="#">GPM-калькулятор — завод «Металлист», линия 2</a><span class="table__sub">Сделка № 48102 · Металлист, монтажные системы</span></td>
+  <td class="td-nowrap hide-md"><span class="type-tag">GPM-калькулятор</span></td>
+  <td class="td-nowrap"><span class="badge badge--approved">Согласовано</span></td>
+  <td class="td-nowrap">Анна Волкова<span class="table__sub">Sales</span></td>
+  <td class="td-nowrap"><span class="due due--done" title="12 ноября 2026, 11:40">Завершено 12 ноября</span></td>
+  <td class="td-nowrap td-muted hide-md">05.11.2026</td>
+</tr><tr>
+  <td class="td-nowrap td-muted">СГ-2026-0404</td>
+  <td><a class="table__title" href="#">Регламент гарантийного обслуживания электроинструмента</a><span class="table__sub">Без сделки</span></td>
+  <td class="td-nowrap hide-md"><span class="type-tag">Другое</span></td>
+  <td class="td-nowrap"><span class="badge badge--rework">На доработке</span></td>
+  <td class="td-nowrap">Роман Ефимов<span class="table__sub">Customer Service</span></td>
+  <td class="td-nowrap"><span class="due" title="18 ноября 2026, 18:00"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Осталось 5 дней</span></td>
+  <td class="td-nowrap td-muted hide-md">04.11.2026</td>
+</tr><tr class="is-overdue">
+  <td class="td-nowrap td-muted">СГ-2026-0397</td>
+  <td><a class="table__title" href="#">GPM-калькулятор — логистический центр «Восток»</a><span class="table__sub">Сделка № 47988 · ЛЦ «Восток», стеллажный крепёж</span></td>
+  <td class="td-nowrap hide-md"><span class="type-tag">GPM-калькулятор</span></td>
+  <td class="td-nowrap"><span class="badge badge--rework">На доработке</span></td>
+  <td class="td-nowrap">Анна Волкова<span class="table__sub">Sales</span></td>
+  <td class="td-nowrap"><span class="due due--overdue" title="11 ноября 2026, 18:00"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Просрочено на 2 дня</span></td>
+  <td class="td-nowrap td-muted hide-md">02.11.2026</td>
+</tr><tr>
+  <td class="td-nowrap td-muted">СГ-2026-0391</td>
+  <td><a class="table__title" href="#">Бюджет выставки «Строительный сезон — 2027»</a><span class="table__sub">Без сделки</span></td>
+  <td class="td-nowrap hide-md"><span class="type-tag">Другое</span></td>
+  <td class="td-nowrap"><span class="badge badge--rejected">Отклонено</span></td>
+  <td class="td-nowrap">Ксения Лаптева<span class="table__sub">Marketing</span></td>
+  <td class="td-nowrap"><span class="due due--done" title="6 ноября 2026, 09:12">Завершено 6 ноября</span></td>
+  <td class="td-nowrap td-muted hide-md">30.10.2026</td>
+</tr><tr>
+  <td class="td-nowrap td-muted">СГ-2026-0388</td>
+  <td><a class="table__title" href="#">GPM-калькулятор — ТРЦ «Меридиан», паркинг</a><span class="table__sub">Сделка № 47903 · Меридиан, химические анкеры</span></td>
+  <td class="td-nowrap hide-md"><span class="type-tag">GPM-калькулятор</span></td>
+  <td class="td-nowrap"><span class="badge badge--approved">Согласовано</span></td>
+  <td class="td-nowrap">Дмитрий Орлов<span class="table__sub">Sales</span></td>
+  <td class="td-nowrap"><span class="due due--done" title="5 ноября 2026, 16:30">Завершено 5 ноября</span></td>
+  <td class="td-nowrap td-muted hide-md">29.10.2026</td>
+</tr><tr>
+  <td class="td-nowrap td-muted">СГ-2026-0385</td>
+  <td><a class="table__title" href="#">Дополнительное соглашение № 3 — АО «Трансмост»</a><span class="table__sub">Сделка № 47850 · Трансмост, мостовые опоры</span></td>
+  <td class="td-nowrap hide-md"><span class="type-tag">Другое</span></td>
+  <td class="td-nowrap"><span class="badge badge--draft">Черновик</span></td>
+  <td class="td-nowrap">Анна Волкова<span class="table__sub">Sales</span></td>
+  <td class="td-nowrap"><span class="due" title="Срок появится после запуска">Срок не задан</span></td>
+  <td class="td-nowrap td-muted hide-md">28.10.2026</td>
+</tr><tr>
+  <td class="td-nowrap td-muted">СГ-2026-0379</td>
+  <td><a class="table__title" href="#">GPM-калькулятор — аэропорт «Южный», терминал B</a><span class="table__sub">Сделка № 47766 · Южный, огнезащитные системы</span></td>
+  <td class="td-nowrap hide-md"><span class="type-tag">GPM-калькулятор</span></td>
+  <td class="td-nowrap"><span class="badge badge--cancelled">Отменено</span></td>
+  <td class="td-nowrap">Виктор Нестеров<span class="table__sub">Engineering</span></td>
+  <td class="td-nowrap"><span class="due due--done" title="30 октября 2026, 14:05">Отменено 30 октября</span></td>
+  <td class="td-nowrap td-muted hide-md">27.10.2026</td>
+</tr></tbody>
+  </table>
+  <div class="pagination">
+    <span class="pagination__info">1–10 из 64</span>
+    <div class="pagination__pages">
+      <button class="page-btn" type="button" disabled aria-label="Предыдущая страница"><svg class="icon" aria-hidden="true"><use href="#i-chevron-left"/></svg></button>
+      <button class="page-btn is-current" type="button" aria-current="page">1</button>
+      <button class="page-btn" type="button">2</button>
+      <button class="page-btn" type="button">3</button>
+      <span class="pagination__gap">…</span>
+      <button class="page-btn" type="button">7</button>
+      <button class="page-btn" type="button" aria-label="Следующая страница"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></button>
+    </div>
+    <label class="pagination__size">На странице
+      <select class="select select--sm" style="width: 76px"><option>10</option><option>25</option><option>50</option></select></label>
+  </div>
+</div>
+</main>
+  </div>
+</div></div>
+<footer class="kit-footer">Документооборот · дизайн-система, тестовая модель. Данные на странице вымышлены.</footer>
+
+</body>
+</html>

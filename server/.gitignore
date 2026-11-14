@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.env
+# каталог загруженных файлов (FILES_DIR по умолчанию)
+data/
+files/
+*.log
