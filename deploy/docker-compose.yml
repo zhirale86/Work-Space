@@ -1,0 +1,48 @@
+# Система документооборота: приложение + PostgreSQL 16.
+# Запуск из каталога deploy/:  cp .env.example .env  (заполнить)  →  docker compose up -d --build
+name: docflow
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-docflow}
+      POSTGRES_USER: ${POSTGRES_USER:-docflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Задайте POSTGRES_PASSWORD в deploy/.env}
+      TZ: ${TZ:-Europe/Moscow}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    # Порт открыт только на локальном интерфейсе сервера — для deploy/backup.sh и deploy/restore.sh.
+    ports:
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: docflow:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      # Пароль подставляется в строку подключения как есть: только буквы, цифры, «-», «_», «.».
+      DATABASE_URL: postgres://${POSTGRES_USER:-docflow}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-docflow}
+      FILES_DIR: /data/files
+      PORT: "3000"
+    volumes:
+      - files-data:/data/files
+    # Снаружи приложение доступно через обратный прокси с HTTPS (deploy/nginx.conf.example).
+    ports:
+      - "127.0.0.1:${APP_PORT:-3000}:3000"
+
+volumes:
+  db-data:
+  files-data:

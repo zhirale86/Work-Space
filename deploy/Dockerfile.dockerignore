@@ -1,0 +1,14 @@
+# Исключения из контекста сборки для deploy/Dockerfile
+# (BuildKit читает файл <имя Dockerfile>.dockerignore рядом с Dockerfile).
+**/node_modules
+**/dist
+**/.env
+**/*.log
+.git
+server/data
+server/files
+server/test
+deploy/backups
+backups
+design
+docs
