@@ -140,20 +140,20 @@ describe('REST-адаптер Битрикс24', () => {
     // Таймер AbortSignal.timeout не удерживает цикл событий; в сервере его удерживает сокет.
     const keep = setInterval(() => {}, 1000);
     try {
-    const f = fakeFetch(
-      (_m, _b, signal) =>
-        new Promise<Response>((_resolve, reject) => {
-          signal?.addEventListener('abort', () => reject(signal.reason));
-        }),
-    );
-    const started = Date.now();
-    await assert.rejects(adapter(f.impl, 150).upsertApprovalTask(input()), (err: Error) => {
-      assert.ok(err instanceof BitrixError);
-      assert.match(err.message, /не ответил за/);
-      assert.ok(!err.message.includes('s3cr3t'), 'адрес вебхука не раскрывается');
-      return true;
-    });
-    assert.ok(Date.now() - started < 2000);
+      const f = fakeFetch(
+        (_m, _b, signal) =>
+          new Promise<Response>((_resolve, reject) => {
+            signal?.addEventListener('abort', () => reject(signal.reason));
+          }),
+      );
+      const started = Date.now();
+      await assert.rejects(adapter(f.impl, 150).upsertApprovalTask(input()), (err: Error) => {
+        assert.ok(err instanceof BitrixError);
+        assert.match(err.message, /не ответил за/);
+        assert.ok(!err.message.includes('s3cr3t'), 'адрес вебхука не раскрывается');
+        return true;
+      });
+      assert.ok(Date.now() - started < 2000);
     } finally {
       clearInterval(keep);
     }
