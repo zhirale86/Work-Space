@@ -63,6 +63,19 @@ describe('Маршрут согласования', () => {
     }
   });
 
+  test('одновременное согласование всеми участниками параллельного маршрута завершает раунд ровно один раз', async () => {
+    const initiator = await makeUser();
+    const approvers = await makeUsers(4);
+    const doc = await makeApproval(initiator, approvers, { mode: 'parallel' });
+    const res = await Promise.all(approvers.map((a) => a.api.post(`/api/documents/${doc.id}/decision`, { decision: 'approve' })));
+    for (const r of res) expectStatus(r, 200);
+    const d = await initiator.api.get<DocumentDetail>(`/api/documents/${doc.id}`);
+    assert.equal(d.body.status, 'approved');
+    assert.ok(d.body.rounds[0].steps.every((s) => s.state === 'approved'));
+    assert.equal((await auditOf('document', doc.id, 'approval.completed')).length, 1);
+    assert.equal((await notificationsOf(initiator.id, 'approval_completed')).filter((n) => n.entity_id === doc.id).length, 1);
+  });
+
   test('отклонение вторым в последовательном маршруте — третий согласующий документ не получал', async () => {
     const initiator = await makeUser();
     const [a1, a2, a3] = await makeUsers(3);
