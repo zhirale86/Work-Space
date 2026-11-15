@@ -1,5 +1,5 @@
 import { useRef, useState, type ReactNode } from 'react';
-import { ApiError } from '../api/client';
+import { ApiError, apiFetch } from '../api/client';
 import type { ApprovalRound, FileItem, FileVersion } from '../api/types';
 import { dateTime, ext, fileSize, NBSP } from '../lib/format';
 import { Icon, type IconName } from './Icon';
@@ -14,7 +14,7 @@ export const MAX_MB = 50;
 export async function downloadVersion(v: FileVersion): Promise<void> {
   let res: Response;
   try {
-    res = await fetch(v.downloadUrl, { credentials: 'same-origin' });
+    res = await apiFetch(v.downloadUrl, { credentials: 'same-origin' });
   } catch {
     throw new ApiError(0, 'network', 'Не удалось скачать файл.');
   }

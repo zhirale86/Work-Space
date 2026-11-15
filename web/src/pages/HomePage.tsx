@@ -145,7 +145,8 @@ export function HomePage() {
   const d = dash.data;
 
   const header = (lead?: string) => <PageHeader title="Мои действия" lead={lead} actions={<CreateMenu onTask={() => setTaskOpen(true)} />} />;
-  const modal = taskOpen && <TaskCreateModal onClose={() => setTaskOpen(false)} onCreated={(t) => navigate(`/tasks/${t.id}`)} />;
+  // Ключ сохраняет открытое окно (и введённые данные), когда главная дозагружается и меняет разметку.
+  const modal = taskOpen && <TaskCreateModal key="task-create" onClose={() => setTaskOpen(false)} onCreated={(t) => navigate(`/tasks/${t.id}`)} />;
 
   if (dash.error) {
     return (

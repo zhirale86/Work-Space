@@ -28,6 +28,26 @@ export function setSessionHandlers(unauthorized: Handler | null, passwordChange:
   onPasswordChange = passwordChange;
 }
 
+/**
+ * Транспорт запросов. По умолчанию — сеть (fetch и XMLHttpRequest); демонстрационная сборка
+ * (`VITE_DEMO=1`) подменяет его имитацией сервера в браузере.
+ */
+export interface Transport {
+  fetch: (input: string, init?: RequestInit) => Promise<Response>;
+  createXhr: () => XMLHttpRequest;
+}
+let transport: Transport = {
+  fetch: (input, init) => fetch(input, init),
+  createXhr: () => new XMLHttpRequest(),
+};
+export function setTransport(t: Transport): void {
+  transport = t;
+}
+/** Запрос через действующий транспорт (например, скачивание файла по `downloadUrl`). */
+export function apiFetch(input: string, init?: RequestInit): Promise<Response> {
+  return transport.fetch(input, init);
+}
+
 export type Query = Record<string, string | number | boolean | null | undefined>;
 
 export function withQuery(path: string, query?: Query): string {
@@ -74,7 +94,7 @@ export async function request<T>(method: string, path: string, body?: unknown, o
   }
   let res: Response;
   try {
-    res = await fetch(`/api${path}`, { method, headers, body: payload, credentials: 'same-origin', signal: opts?.signal });
+    res = await transport.fetch(`/api${path}`, { method, headers, body: payload, credentials: 'same-origin', signal: opts?.signal });
   } catch (err) {
     if ((err as Error)?.name === 'AbortError') throw new ApiError(0, 'aborted', 'Запрос отменён');
     throw new ApiError(0, 'network', NETWORK_MESSAGE);
@@ -111,7 +131,7 @@ export interface UploadHandle<T> {
 
 /** Загрузка файла с ходом выполнения (XMLHttpRequest — у fetch нет прогресса отправки). */
 export function upload<T>(path: string, file: File, onProgress?: (percent: number) => void): UploadHandle<T> {
-  const xhr = new XMLHttpRequest();
+  const xhr = transport.createXhr();
   const promise = new Promise<T>((resolve, reject) => {
     xhr.open('POST', `/api${path}`);
     xhr.withCredentials = false;

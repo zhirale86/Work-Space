@@ -96,3 +96,8 @@ export const ROLE_HINTS: Record<string, string> = {
   admin: 'Управляет пользователями, справочниками и интеграцией; содержимое документов не видит без доступа.',
   auditor: 'Видит отчёты и сводки ознакомления по всей компании.',
 };
+
+/** Полный адрес страницы приложения (в демонстрационной сборке — с hash-маршрутом для file://). */
+export function absoluteUrl(path: string): string {
+  return import.meta.env.VITE_DEMO === '1' ? `${window.location.href.split('#')[0]}#${path}` : `${window.location.origin}${path}`;
+}

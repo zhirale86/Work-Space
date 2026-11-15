@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { type ComponentType, createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useInterval } from '../api/hooks';
@@ -21,6 +21,9 @@ const CountersCtx = createContext<{ counters: Counters; refresh: () => void }>({
 export const useCounters = () => useContext(CountersCtx);
 
 const POLL_MS = 60_000;
+
+/** Дополнительный элемент верхней панели: демонстрационная сборка подставляет переключатель сотрудников. */
+export const layoutSlots: { topbarExtra: ComponentType | null } = { topbarExtra: null };
 
 export const NOTIFY_ICON: Partial<Record<NotificationType, IconName>> = {
   approval_requested: 'approve',
@@ -242,6 +245,7 @@ export function AppLayout() {
   const isB24 = p.startsWith('/b24') || p.startsWith('/bitrix-mock');
   const section = (prefix: string) => p === prefix || p.startsWith(`${prefix}/`);
   const role = [me.department?.name, me.position].filter(Boolean).join(' · ');
+  const TopbarExtra = layoutSlots.topbarExtra;
 
   return (
     <CountersCtx.Provider value={{ counters, refresh }}>
@@ -288,6 +292,7 @@ export function AppLayout() {
               <input id="top-search" className="input" type="search" placeholder="Номер, название или сделка" value={search} onChange={(e) => setSearch(e.target.value)} />
             </form>
             <div className="topbar__actions">
+              {TopbarExtra && <TopbarExtra />}
               <Bell unread={counters.unread} onChanged={refresh} />
               <Dropdown
                 label="Меню профиля"

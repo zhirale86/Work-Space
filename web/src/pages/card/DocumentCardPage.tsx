@@ -10,7 +10,7 @@ import { ConfirmDialog } from '../../components/Modal';
 import { useToast } from '../../components/Toast';
 import { Alert, Avatar, Button, Card, DocStatusBadge, Due, LoadError, Loading, OverdueBadge, PageHeader, TaskStatusBadge, cx } from '../../components/ui';
 import { count, date, dateTime, DAYS, joinRu, NBSP, ofCount, ordinal, time } from '../../lib/format';
-import { docEditPath, docPath } from '../../lib/status';
+import { absoluteUrl, docEditPath, docPath } from '../../lib/status';
 import { useCounters } from '../../layout/AppLayout';
 import { useMe } from '../../layout/Auth';
 import { NoAccess } from '../Misc';
@@ -524,7 +524,7 @@ export function DocumentCardPage({ kind }: { kind: DocKind }) {
       label: 'Скопировать ссылку',
       icon: 'link',
       onSelect: () => {
-        const url = `${window.location.origin}${docPath(doc.kind, doc.id)}`;
+        const url = absoluteUrl(docPath(doc.kind, doc.id));
         navigator.clipboard?.writeText(url).then(
           () => toast.info('Ссылка скопирована.'),
           () => toast.error('Не удалось скопировать ссылку', url),

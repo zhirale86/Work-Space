@@ -1,4 +1,5 @@
-import { Navigate, Outlet, createBrowserRouter, useParams } from 'react-router-dom';
+import type { ComponentType } from 'react';
+import { Navigate, Outlet, type RouteObject, useParams } from 'react-router-dom';
 import { AppLayout } from './layout/AppLayout';
 import { AuthProvider, RequireAuth } from './layout/Auth';
 import { AdminLayout } from './pages/admin/AdminLayout';
@@ -38,54 +39,61 @@ function Keyed({ render }: { render: (id: string) => JSX.Element }) {
   return <div key={id} className="contents">{render(id)}</div>;
 }
 
-export const router = createBrowserRouter(
-  [
-  {
-    element: <Root />,
-    children: [
-      { path: '/login', element: <LoginPage /> },
-      { path: '/login/password', element: <ChangePasswordPage /> },
-      {
-        element: <Protected />,
-        children: [
-          { path: '/', element: <HomePage /> },
-          { path: '/approvals', element: <DocumentListPage key="approvals" mode="approvals" /> },
-          { path: '/approvals/new', element: <DocumentEditPage kind="approval" /> },
-          { path: '/approvals/:id', element: <Keyed render={() => <DocumentCardPage kind="approval" />} /> },
-          { path: '/approvals/:id/edit', element: <DocumentEditPage kind="approval" /> },
-          { path: '/orders', element: <DocumentListPage key="orders" mode="orders" /> },
-          { path: '/orders/new', element: <DocumentEditPage kind="order" /> },
-          { path: '/orders/:id', element: <Keyed render={() => <DocumentCardPage kind="order" />} /> },
-          { path: '/orders/:id/edit', element: <DocumentEditPage kind="order" /> },
-          { path: '/documents', element: <DocumentListPage key="all" mode="all" /> },
-          { path: '/documents/:id', element: <Keyed render={() => <DocumentRedirect />} /> },
-          { path: '/tasks', element: <TasksListPage /> },
-          { path: '/tasks/:id', element: <Keyed render={() => <TaskCardPage />} /> },
-          { path: '/reports', element: <ReportsPage /> },
-          { path: '/reports/:code', element: <ReportsPage /> },
-          { path: '/notifications', element: <NotificationsPage /> },
-          { path: '/profile', element: <ProfilePage /> },
-          {
-            path: '/admin',
-            element: <AdminLayout />,
-            children: [
-              { index: true, element: <Navigate to="/admin/users" replace /> },
-              { path: 'users', element: <UsersPage /> },
-              { path: 'departments', element: <DepartmentsPage /> },
-              { path: 'types', element: <DocTypesPage /> },
-              { path: 'bitrix', element: <BitrixAdminPage /> },
-              { path: 'log', element: <AuditPage /> },
-            ],
-          },
-          { path: '/b24', element: <DealsListPage /> },
-          { path: '/b24/deals/:id', element: <Keyed render={() => <DealPage />} /> },
-          { path: '/bitrix-mock/deals', element: <DealsListPage /> },
-          { path: '/bitrix-mock/deals/:id', element: <Keyed render={() => <DealPage />} /> },
-          { path: '*', element: <NotFoundPage /> },
-        ],
-      },
-    ],
-  },
-],
-  { future: { v7_relativeSplatPath: true, v7_fetcherPersist: true, v7_normalizeFormMethod: true, v7_partialHydration: true, v7_skipActionErrorRevalidation: true } },
-);
+/** Подмена оболочки и страницы входа (демонстрационная сборка); по умолчанию — обычные. */
+export interface AppShell {
+  Root?: ComponentType;
+  Login?: ComponentType;
+}
+
+export const ROUTER_FUTURE = { v7_relativeSplatPath: true, v7_fetcherPersist: true, v7_normalizeFormMethod: true, v7_partialHydration: true, v7_skipActionErrorRevalidation: true } as const;
+
+export function buildRoutes({ Root: RootEl = Root, Login = LoginPage }: AppShell = {}): RouteObject[] {
+  return [
+    {
+      element: <RootEl />,
+      children: [
+        { path: '/login', element: <Login /> },
+        { path: '/login/password', element: <ChangePasswordPage /> },
+        {
+          element: <Protected />,
+          children: [
+            { path: '/', element: <HomePage /> },
+            { path: '/approvals', element: <DocumentListPage key="approvals" mode="approvals" /> },
+            { path: '/approvals/new', element: <DocumentEditPage kind="approval" /> },
+            { path: '/approvals/:id', element: <Keyed render={() => <DocumentCardPage kind="approval" />} /> },
+            { path: '/approvals/:id/edit', element: <DocumentEditPage kind="approval" /> },
+            { path: '/orders', element: <DocumentListPage key="orders" mode="orders" /> },
+            { path: '/orders/new', element: <DocumentEditPage kind="order" /> },
+            { path: '/orders/:id', element: <Keyed render={() => <DocumentCardPage kind="order" />} /> },
+            { path: '/orders/:id/edit', element: <DocumentEditPage kind="order" /> },
+            { path: '/documents', element: <DocumentListPage key="all" mode="all" /> },
+            { path: '/documents/:id', element: <Keyed render={() => <DocumentRedirect />} /> },
+            { path: '/tasks', element: <TasksListPage /> },
+            { path: '/tasks/:id', element: <Keyed render={() => <TaskCardPage />} /> },
+            { path: '/reports', element: <ReportsPage /> },
+            { path: '/reports/:code', element: <ReportsPage /> },
+            { path: '/notifications', element: <NotificationsPage /> },
+            { path: '/profile', element: <ProfilePage /> },
+            {
+              path: '/admin',
+              element: <AdminLayout />,
+              children: [
+                { index: true, element: <Navigate to="/admin/users" replace /> },
+                { path: 'users', element: <UsersPage /> },
+                { path: 'departments', element: <DepartmentsPage /> },
+                { path: 'types', element: <DocTypesPage /> },
+                { path: 'bitrix', element: <BitrixAdminPage /> },
+                { path: 'log', element: <AuditPage /> },
+              ],
+            },
+            { path: '/b24', element: <DealsListPage /> },
+            { path: '/b24/deals/:id', element: <Keyed render={() => <DealPage />} /> },
+            { path: '/bitrix-mock/deals', element: <DealsListPage /> },
+            { path: '/bitrix-mock/deals/:id', element: <Keyed render={() => <DealPage />} /> },
+            { path: '*', element: <NotFoundPage /> },
+          ],
+        },
+      ],
+    },
+  ];
+}
