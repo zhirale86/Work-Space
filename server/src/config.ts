@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import path from 'node:path';
 
 function str(name: string, def: string): string {
@@ -16,8 +17,12 @@ function bool(name: string, def: boolean): boolean {
 
 const serverRoot = path.resolve(__dirname, '..', '..');
 
+// Настройки из server/.env; переменные, уже заданные в окружении, имеют приоритет.
+const envFile = path.join(serverRoot, '.env');
+if (!process.env.DOCFLOW_NO_ENV_FILE && fs.existsSync(envFile)) process.loadEnvFile(envFile);
+
 export const config = {
-  databaseUrl: str('DATABASE_URL', 'postgres://docflow:docflow@127.0.0.1:5433/docflow'),
+  databaseUrl: str('DATABASE_URL', 'postgres://docflow:docflow@127.0.0.1:5432/docflow'),
   port: num('PORT', 3000),
   host: str('HOST', '0.0.0.0'),
   filesDir: path.resolve(str('FILES_DIR', path.join(serverRoot, 'data', 'files'))),

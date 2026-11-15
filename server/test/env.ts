@@ -13,6 +13,7 @@ if (!/test/i.test(dbName)) {
   throw new Error(`Тесты очищают базу данных; имя базы должно содержать «test», указано: ${dbName}`);
 }
 
+process.env.DOCFLOW_NO_ENV_FILE = '1';
 process.env.DATABASE_URL = url;
 process.env.FILES_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'docflow-test-files-'));
 process.env.LOG_LEVEL = 'silent';

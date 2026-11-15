@@ -71,7 +71,7 @@ curl -s -b /tmp/c http://localhost:3000/api/dashboard
 
 | Переменная | По умолчанию | Назначение |
 |---|---|---|
-| `DATABASE_URL` | `postgres://docflow:docflow@127.0.0.1:5433/docflow` | подключение к базе (пул на 20 соединений) |
+| `DATABASE_URL` | `postgres://docflow:docflow@127.0.0.1:5432/docflow` | подключение к базе (пул на 20 соединений) |
 | `PORT`, `HOST` | `3000`, `0.0.0.0` | адрес HTTP-сервера |
 | `PUBLIC_URL` | `http://localhost:3000` | внешний адрес: ссылки на карточки в Битрикс24, ссылки эмулятора |
 | `FILES_DIR` | `server/data/files` | каталог файлов (подкаталог `tmp` — приём загрузок) |
