@@ -38,7 +38,8 @@ function Keyed({ render }: { render: (id: string) => JSX.Element }) {
   return <div key={id} className="contents">{render(id)}</div>;
 }
 
-export const router = createBrowserRouter([
+export const router = createBrowserRouter(
+  [
   {
     element: <Root />,
     children: [
@@ -85,4 +86,6 @@ export const router = createBrowserRouter([
       },
     ],
   },
-]);
+],
+  { future: { v7_relativeSplatPath: true, v7_fetcherPersist: true, v7_normalizeFormMethod: true, v7_partialHydration: true, v7_skipActionErrorRevalidation: true } },
+);

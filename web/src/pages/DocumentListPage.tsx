@@ -403,7 +403,7 @@ export function DocumentListPage({ mode }: { mode: Mode }) {
       </div>
 
       <form className="filters" aria-label="Фильтры" onSubmit={(e) => e.preventDefault()}>
-        <div className="filters__row">
+        <div className="filters__row filters__row--docs">
           <label className="field">
             <span className="field__label">Поиск</span>
             <span className="search">
@@ -520,11 +520,11 @@ export function DocumentListPage({ mode }: { mode: Mode }) {
                         <td className="td-nowrap">
                           <DocStatusBadge kind={d.kind} status={d.status} label={d.statusLabel} />
                         </td>
-                        <td className="td-nowrap hide-sm">
+                        <td className="td-person hide-sm">
                           {d.initiator.fullName}
                           <span className="table__sub">{d.department?.name ?? '—'}</span>
                         </td>
-                        <td className="td-nowrap">{finished ? <span className="due due--done">{d.statusLabel}</span> : <Due at={d.dueAt} />}</td>
+                        <td className="td-nowrap">{finished ? <span className="due due--done">{d.status === 'cancelled' ? 'Отменено' : d.status === 'rejected' ? 'Завершено отказом' : 'Завершено'}</span> : <Due at={d.dueAt} />}</td>
                         <td className="td-nowrap td-muted hide-md">{dateShort(d.createdAt)}</td>
                       </tr>
                     );

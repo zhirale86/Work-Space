@@ -16,6 +16,24 @@ interface AuthValue {
 
 const Ctx = createContext<AuthValue | null>(null);
 
+/** Признак «вход выполнялся в этом браузере»: без него не спрашиваем /auth/me и не получаем лишний 401. */
+const MARK = 'docflow:session';
+export function markSession(on: boolean): void {
+  try {
+    if (on) localStorage.setItem(MARK, '1');
+    else localStorage.removeItem(MARK);
+  } catch {
+    /* хранилище недоступно — просто проверим сессию запросом */
+  }
+}
+function hasMark(): boolean {
+  try {
+    return localStorage.getItem(MARK) === '1';
+  } catch {
+    return true;
+  }
+}
+
 export function useAuth(): AuthValue {
   const v = useContext(Ctx);
   if (!v) throw new Error('AuthProvider отсутствует');
@@ -36,11 +54,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
 
   const refreshMe = useCallback(async () => {
+    if (!hasMark()) {
+      setUser(null);
+      return;
+    }
     try {
       const r = await api.get<MeResponse>('/auth/me', undefined, { silent401: true });
       setUser(r.user);
     } catch (e) {
-      if (e instanceof ApiError && e.status === 401) setUser(null);
+      if (e instanceof ApiError && e.status === 401) {
+        markSession(false);
+        setUser(null);
+      }
     }
   }, []);
 
@@ -61,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSessionHandlers(
       () => {
         const here = window.location.pathname + window.location.search;
+        markSession(false);
         setUser(null);
         if (!window.location.pathname.startsWith('/login')) navigate(`/login?next=${encodeURIComponent(here)}&reason=expired`, { replace: true });
       },
@@ -75,6 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       /* сессия могла уже истечь */
     }
+    markSession(false);
     setUser(null);
     setMeta(null);
     navigate('/login', { replace: true });

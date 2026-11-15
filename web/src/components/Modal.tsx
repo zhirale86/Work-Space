@@ -31,6 +31,8 @@ export function Modal({ title, onClose, children, footer, size, footerBetween, i
     target?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        // Открытый выпадающий список внутри окна закрывается первым.
+        if ((e.target as HTMLElement | null)?.getAttribute?.('aria-expanded') === 'true') return;
         e.stopPropagation();
         closeRef.current();
       }

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ApiError, api, errorText } from '../../api/client';
+import { ApiError, api } from '../../api/client';
 import { useApi, useDelayed, useDocumentTitle } from '../../api/hooks';
-import type { AdminAuditEntry, AdminBitrixRetryResponse, AdminBitrixState, AdminUser, DealsResponse, Page, UserRef } from '../../api/types';
+import type { AdminAuditEntry, AdminBitrixRetryResponse, AdminBitrixState, DealsResponse, Page, UserRef } from '../../api/types';
 import { Icon } from '../../components/Icon';
 import { Pagination } from '../../components/Pagination';
 import { useToast } from '../../components/Toast';
@@ -18,6 +18,7 @@ export function BitrixAdminPage() {
   const [check, setCheck] = useState<{ ok: boolean; text: string } | null>(null);
   const [retrying, setRetrying] = useState<number | 'all' | null>(null);
   const [toggling, setToggling] = useState(false);
+  const [mockOn, setMockOn] = useState<boolean | null>(null);
   const s = st.data;
 
   const runCheck = async () => {
@@ -51,12 +52,15 @@ export function BitrixAdminPage() {
 
   const toggleMock = async (unavailable: boolean) => {
     setToggling(true);
+    setMockOn(unavailable);
     try {
       const r = await api.put<AdminBitrixState>('/admin/bitrix/mock', { unavailable });
       st.setData(r);
+      setMockOn(null);
       setCheck(null);
       toast.info(unavailable ? 'Эмулятор Битрикс24 недоступен — передача будет завершаться ошибкой.' : 'Эмулятор Битрикс24 снова доступен.');
     } catch (e) {
+      setMockOn(null);
       toast.fail('Не удалось переключить', e);
     } finally {
       setToggling(false);
@@ -67,7 +71,6 @@ export function BitrixAdminPage() {
   if (!s) return <Loading><div className="stats">{[0, 1, 2].map((i) => <span key={i} className="skeleton skeleton--tile" />)}</div></Loading>;
 
   const linked = check ? check.ok : s.mode === 'mock' ? !s.mockUnavailable : s.webhookConfigured;
-  const errors = s.queue.filter((q) => q.link.state === 'error');
 
   return (
     <div className="stack stack--lg">
@@ -96,7 +99,7 @@ export function BitrixAdminPage() {
           <Card title="Проверка отказа">
             <div className="stack">
               <label className="switch">
-                <input type="checkbox" checked={s.mockUnavailable} disabled={toggling} onChange={(e) => void toggleMock(e.target.checked)} />
+                <input type="checkbox" checked={mockOn ?? s.mockUnavailable} aria-busy={toggling} onChange={(e) => void toggleMock(e.target.checked)} />
                 <span>Эмулятор недоступен</span>
               </label>
               <p className="text-sm text-muted">Включите, чтобы проверить сценарий № 11: передача не удаётся, ошибка попадает в очередь.</p>
@@ -185,7 +188,6 @@ export function BitrixAdminPage() {
           <span className="text-sm text-muted">Повторная отправка обновляет существующую запись в сделке и не создаёт дубликатов.</span>
         </footer>
       </section>
-      {errors.length > 0 && null}
     </div>
   );
 }
@@ -315,5 +317,3 @@ export function AuditPage() {
   );
 }
 
-export type { AdminUser };
-export { errorText };

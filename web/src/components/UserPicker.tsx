@@ -48,8 +48,10 @@ export function UserPicker({ value, onChange, single, ordered, excludeIds = [], 
       .get<Page<UserRef>>('/users', { q: q.trim() || undefined, role, pageSize: PAGE })
       .then((p) => {
         if (cancelled) return;
-        setItems(p.items);
-        setTotal(p.total);
+        // Инициатор и другие исключённые не предлагаются вовсе.
+        const ex = new Set(excludeIds);
+        setItems(p.items.filter((u) => !ex.has(u.id)));
+        setTotal(p.total - p.items.filter((u) => ex.has(u.id)).length);
         setActive(0);
       })
       .catch(() => !cancelled && setFailed(true))
@@ -57,7 +59,8 @@ export function UserPicker({ value, onChange, single, ordered, excludeIds = [], 
     return () => {
       cancelled = true;
     };
-  }, [q, open, role]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q, open, role, excludeIds.join(',')]);
 
   useEffect(() => {
     if (!open) return;

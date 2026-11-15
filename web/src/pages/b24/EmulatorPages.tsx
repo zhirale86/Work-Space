@@ -1,7 +1,7 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useApi, useDelayed, useDocumentTitle } from '../../api/hooks';
 import type { AdminBitrixState, DocStatus, MockDeal, MockDealDetail, MockTask } from '../../api/types';
-import { Alert, Button, Card, Empty, LoadError, Loading, PageHeader, cx } from '../../components/ui';
+import { Alert, Button, Empty, LoadError, Loading, PageHeader, cx } from '../../components/ui';
 import { dateTime, money, NBSP } from '../../lib/format';
 import { APPROVAL_STATUS_LABELS, DOC_BADGE } from '../../lib/status';
 import { useAuth } from '../../layout/Auth';
@@ -137,8 +137,27 @@ export function DealPage() {
       <PageHeader crumbs={[{ to: '/b24', label: 'Сделки' }, { label: `№${NBSP}${data.id}` }]} title={`Сделка №${NBSP}${data.id} · ${data.title}`} />
       <div className="stack stack--lg">
         <UnavailableNote />
-        <div className="layout-split">
-          <section className="card" aria-labelledby="b24-tasks">
+        <section className="card card--compact" aria-label="О сделке">
+          <div className="card__body deal-facts">
+            <div>
+              <div className="deal-facts__term">Клиент</div>
+              <div className="deal-facts__value">{data.company}</div>
+            </div>
+            <div>
+              <div className="deal-facts__term">Сумма</div>
+              <div className="deal-facts__value num">{money(data.amount)}</div>
+            </div>
+            <div>
+              <div className="deal-facts__term">Стадия</div>
+              <div className="deal-facts__value">{data.stage}</div>
+            </div>
+            <div>
+              <div className="deal-facts__term">Ответственный</div>
+              <div className="deal-facts__value text-muted">не передаётся эмулятором</div>
+            </div>
+          </div>
+        </section>
+        <section className="card" aria-labelledby="b24-tasks">
             <header className="card__header">
               <h2 className="card__title" id="b24-tasks">
                 Задачи <span className="card__count">{data.tasks.length}</span>
@@ -187,7 +206,7 @@ export function DealPage() {
                           <td className="td-nowrap">{x.status ? <span className={cx('badge', DOC_BADGE[x.status])}>{x.label}</span> : <span className="badge badge--neutral">{x.label || t.statusLabel}</span>}</td>
                           <td className="td-nowrap hide-md">{dateTime(t.createdAt)}</td>
                           <td>{x.initiator ?? '—'}</td>
-                          <td>{x.current ?? (closed ? '—' : '—')}</td>
+                          <td>{x.current ?? '—'}</td>
                           <td className="td-nowrap hide-md">{dateTime(t.updatedAt)}</td>
                           <td className="td-actions">
                             {t.documentId ? (
@@ -204,22 +223,7 @@ export function DealPage() {
               </div>
             )}
           </section>
-          <aside className="layout-split__aside">
-            <Card title="О сделке" compact>
-              <dl className="dl">
-                <dt className="dl__term">Клиент</dt>
-                <dd className="dl__value">{data.company}</dd>
-                <dt className="dl__term">Сумма</dt>
-                <dd className="dl__value num">{money(data.amount)}</dd>
-                <dt className="dl__term">Стадия</dt>
-                <dd className="dl__value">{data.stage}</dd>
-                <dt className="dl__term">Ответственный</dt>
-                <dd className="dl__value">{data.tasks.map((t) => parseTask(t).initiator).find(Boolean) ?? 'не назначен'}</dd>
-              </dl>
-            </Card>
-            <p className="text-sm text-muted">Изменить или закрыть запись здесь нельзя: источник статуса — Документооборот.</p>
-          </aside>
-        </div>
+        <p className="text-sm text-muted">Изменить или закрыть запись здесь нельзя: источник статуса — Документооборот.</p>
       </div>
     </>
   );

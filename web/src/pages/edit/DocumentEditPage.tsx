@@ -10,7 +10,7 @@ import { ConfirmDialog, Modal } from '../../components/Modal';
 import { useToast } from '../../components/Toast';
 import { UserPicker } from '../../components/UserPicker';
 import { Alert, Button, DocStatusBadge, Field, LoadError, Loading, PageHeader, cx } from '../../components/ui';
-import { count, dateTimeFull, ext, isoDay, joinRu, NBSP, time } from '../../lib/format';
+import { count, dateTimeFull, dueFromDay, ext, isoDay, joinRu, NBSP, time } from '../../lib/format';
 import { docEditPath, docPath } from '../../lib/status';
 import { useMe } from '../../layout/Auth';
 import { NoAccess } from '../Misc';
@@ -74,7 +74,7 @@ function payloadOf(f: FormState, kind: DocKind): UpdateDocumentRequest {
   const p: UpdateDocumentRequest = {
     title: f.title.trim(),
     description: f.description,
-    dueAt: f.due || null,
+    dueAt: f.due ? dueFromDay(f.due) : null,
     routeMode: f.routeMode,
     approverIds: f.approvers.map((u) => u.id),
     observerIds: f.observers.map((u) => u.id),
@@ -275,7 +275,6 @@ export function DocumentEditPage({ kind }: { kind: DocKind }) {
   };
 
   const mainFile = files.find((f) => f.role === 'main' && !f.deletedAt) ?? null;
-  const attachments = files.filter((f) => f.role !== 'main' && !f.deletedAt);
   const mainUploading = uploads.some((u) => u.role === 'main' && !u.versionOf && !u.error);
 
   const onMainFiles = (list: File[]) => {

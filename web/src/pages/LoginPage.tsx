@@ -4,7 +4,7 @@ import { ApiError, api } from '../api/client';
 import { useDocumentTitle } from '../api/hooks';
 import type { LoginResponse } from '../api/types';
 import { Alert, Button, Field } from '../components/ui';
-import { useAuth } from '../layout/Auth';
+import { markSession, useAuth } from '../layout/Auth';
 
 /** Разрешаем возврат только на внутренние адреса приложения. */
 export function safeNext(next: string | null): string {
@@ -60,6 +60,7 @@ export function LoginPage() {
     setBusy(true);
     try {
       const r = await api.post<LoginResponse>('/auth/login', { login: login.trim(), password }, { silent401: true });
+      markSession(true);
       tempPassword = r.user.mustChangePassword ? password : null;
       setUser(r.user);
       navigate(r.user.mustChangePassword ? `/login/password?next=${encodeURIComponent(next)}` : next, { replace: true });

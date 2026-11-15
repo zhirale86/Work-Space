@@ -9,8 +9,7 @@ import { ConfirmDialog, Modal } from '../../components/Modal';
 import { useToast } from '../../components/Toast';
 import { UserPicker } from '../../components/UserPicker';
 import { Alert, Avatar, Button, Card, Field, LoadError, Loading, OverdueBadge, PageHeader, PersonChips, TaskStatusBadge, cx } from '../../components/ui';
-import { date, dateTimeFull, due, isoDay } from '../../lib/format';
-import { docPath } from '../../lib/status';
+import { date, dateTimeFull, due, dueFromDay, isoDay } from '../../lib/format';
 import { useCounters } from '../../layout/AppLayout';
 import { useMe } from '../../layout/Auth';
 import { NoAccess } from '../Misc';
@@ -104,7 +103,7 @@ function EditModal({ task, field, onDone, onClose }: { task: TaskDetail; field: 
     if (field === 'assignee' && !who.length) return setFailure('Выберите исполнителя.');
     setBusy(true);
     try {
-      const t = await api.patch<TaskDetail>(`/tasks/${task.id}`, field === 'due' ? { dueAt: dueV } : { assigneeId: who[0].id });
+      const t = await api.patch<TaskDetail>(`/tasks/${task.id}`, field === 'due' ? { dueAt: dueFromDay(dueV) } : { assigneeId: who[0].id });
       onDone(t);
     } catch (e) {
       setFailure(errorText(e));
@@ -421,7 +420,7 @@ export function TaskCardPage() {
             {!task.document ? (
               <p className="text-muted">Самостоятельное поручение, без документа-основания.</p>
             ) : task.document.accessible ? (
-              <Link className="link" to={docPath('order', task.document.id).replace('/orders/', '/documents/')}>
+              <Link className="link" to={`/documents/${task.document.id}`}>
                 {task.document.number} · {task.document.title}
               </Link>
             ) : (

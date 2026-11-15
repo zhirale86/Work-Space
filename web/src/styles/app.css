@@ -1,0 +1,174 @@
+/* ==========================================================================
+   UTECH · Документооборот — дополнения к ui.css для собранного приложения.
+   Только то, чего нет в дизайн-системе; значения — из tokens.css.
+   ========================================================================== */
+
+body { background: var(--bg-app); }
+#root { min-height: 100vh; }
+.contents { display: contents; }
+
+/* Пропуск навигации с клавиатуры */
+.skip-link { position: absolute; left: var(--sp-3); top: -60px; z-index: var(--z-toast); padding: var(--sp-2) var(--sp-3); border-radius: var(--radius); background: var(--c-graphite); color: var(--c-white); font-weight: var(--fw-medium); }
+.skip-link:focus-visible { top: var(--sp-3); }
+.content:focus { outline: none; }
+
+/* Кнопки-плитки и кнопки-строки: сброс оформления кнопки браузера */
+button.stat { width: 100%; font: inherit; cursor: pointer; }
+.stats--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.stats--report { grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); }
+.stats--report .stat__label { line-height: 1.3; }
+
+/* Выпадающие меню и панели: якорь */
+.menu-wrap { position: relative; display: inline-flex; }
+.menu--right { top: calc(100% + 4px); right: 0; }
+.menu--left { top: calc(100% + 4px); left: 0; }
+.td-actions .menu-wrap { vertical-align: middle; }
+
+.topbar__brand-link { display: none; flex: none; }
+@media (max-width: 1199px) { .topbar__brand-link { display: inline-flex; } }
+
+/* Затемнение под выдвижным меню (до 720 px) */
+.nav-scrim { display: none; }
+@media (max-width: 719px) {
+  .nav-scrim { display: block; position: fixed; inset: 0; z-index: calc(var(--z-sidebar) - 1); background: rgba(29, 29, 31, 0.32); }
+}
+
+.emulator-bar__back { margin-left: auto; white-space: nowrap; }
+
+/* Страницы-заглушки и узкие страницы */
+.page-center { display: grid; place-items: center; min-height: calc(100vh - var(--topbar-h) - 160px); }
+.content-narrow { max-width: 880px; }
+
+/* Вкладки страницы над фильтрами и таблицами */
+.tabs--page { margin-bottom: var(--sp-5); }
+.tabs--modal { gap: var(--sp-5); margin-bottom: var(--sp-1); }
+.tabs a.tab { text-decoration: none; }
+.tab:disabled { color: var(--text-disabled); cursor: not-allowed; }
+
+.section--tight { margin-top: var(--sp-5); }
+
+/* Скелетоны внутри таблиц и карточек */
+.skeleton-pad { padding: var(--sp-4) var(--sp-6); }
+.table td.skeleton-cell { height: 52px; padding: var(--sp-1) var(--sp-6); }
+.table tr.is-stale td { opacity: 0.6; }
+
+/* Фильтры */
+.filters__row--tasks { grid-template-columns: minmax(240px, 2fr) minmax(180px, 1fr) auto auto; }
+.filters__row--report { grid-template-columns: minmax(200px, 280px) minmax(240px, 360px); }
+.filters__row--admin { grid-template-columns: minmax(220px, 1.6fr) repeat(3, minmax(150px, 1fr)); }
+.filters__row--audit { grid-template-columns: minmax(220px, 1.6fr) minmax(200px, 1.2fr) minmax(160px, 1fr) 164px 164px; }
+.filters__check { align-self: end; min-height: var(--control-h); }
+.filters__row .picker__control { min-height: var(--control-h); }
+.filters__row .picker__input { min-width: 60px; }
+.filters__row .chip { max-width: calc(100% - 8px); overflow: hidden; text-overflow: ellipsis; }
+.btn.is-applied { border-color: var(--c-graphite); box-shadow: inset 0 0 0 1px var(--c-graphite); }
+.icon--flip { transform: rotate(180deg); }
+@media (max-width: 1199px) {
+  .filters__row--tasks, .filters__row--admin, .filters__row--audit { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .filters__row--tasks > :first-child, .filters__row--admin > :first-child, .filters__row--audit > :first-child { grid-column: 1 / -1; }
+  .stats--report { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 719px) {
+  .filters__row--tasks, .filters__row--admin, .filters__row--audit, .filters__row--report, .stats--3, .stats--report { grid-template-columns: minmax(0, 1fr); }
+}
+
+.period-pop { display: flex; flex-direction: column; gap: var(--sp-3); width: 344px; padding: var(--sp-4); }
+.period-pop__dates { gap: var(--sp-3); }
+.filter-chip--preset { padding: 0 10px; cursor: pointer; }
+.filter-chip--preset:hover { border-color: var(--c-gray); }
+.filter-chip--preset.is-active { border-color: var(--c-graphite); background: var(--bg-muted); }
+
+/* Выбор сотрудников: доп. состояния и перестановка меток */
+.picker__control.is-invalid { border-color: var(--c-brand); box-shadow: 0 0 0 1px var(--c-brand); }
+.picker__control.is-disabled { background: var(--bg-muted); cursor: not-allowed; }
+.chip--draggable { cursor: grab; }
+.chip.is-dragging { opacity: 0.5; }
+.chip__moves { display: inline-flex; gap: 0; }
+.chip__remove:disabled { opacity: 0.35; cursor: default; background: none; color: var(--c-steel-dark); }
+.chip__note { font-weight: var(--fw-regular); color: var(--c-brand-dark); }
+.chip--wide { max-width: 100%; height: auto; min-height: 26px; white-space: normal; padding-top: 3px; padding-bottom: 3px; }
+
+/* Выбранная сделка */
+.deal-plate { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--sp-4); padding: var(--sp-4) var(--sp-5); border: 1px solid var(--border); border-radius: var(--radius); background: var(--c-lighter); }
+.deal-plate__main { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.deal-plate .deal__id { margin-bottom: var(--sp-1); }
+
+.bullets { margin-top: var(--sp-1); padding-left: 18px; list-style: disc; }
+
+/* Полоса этапов приказа: Согласование → Утверждение → Ознакомление */
+.stages { display: flex; align-items: center; flex-wrap: wrap; gap: var(--sp-2); margin: calc(var(--sp-2) * -1) 0 var(--sp-6); font-size: var(--fs-13); color: var(--text-muted); }
+.stages__item { display: inline-flex; align-items: center; gap: var(--sp-2); font-weight: var(--fw-medium); }
+.stages__sep { width: 16px; height: 16px; color: var(--c-gray); margin-right: var(--sp-1); }
+.stages__mark { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--c-gray); font-size: var(--fs-12); font-variant-numeric: tabular-nums; }
+.stages__mark .icon { width: 12px; height: 12px; stroke-width: 2; }
+.stages__item.is-done { color: var(--c-ok); }
+.stages__item.is-done .stages__mark { border-color: var(--c-ok); background: var(--c-ok); color: var(--c-white); }
+.stages__item.is-current { color: var(--text); }
+.stages__item.is-current .stages__mark { border-color: var(--c-graphite); border-width: 2px; color: var(--c-graphite); }
+
+.card-alerts:not(:empty) { margin-bottom: var(--sp-6); }
+.person-row { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+.person-row__main { flex: 1 1 auto; min-width: 0; }
+.pre-wrap { white-space: pre-wrap; overflow-wrap: anywhere; }
+.route__alert { margin-top: var(--sp-3); }
+
+.timeline-block { margin-top: var(--sp-5); }
+.timeline-more { margin-top: var(--sp-4); }
+.timeline-sep { margin: var(--sp-5) 0; }
+.comment-form .btn { flex: none; }
+
+.notify-list .notify:first-child { border-top: 0; }
+
+.report-switch { margin-bottom: var(--sp-3); }
+.table-wrap--pager { margin-top: -1px; border-top-left-radius: 0; border-top-right-radius: 0; }
+.table-wrap--pager .pagination { border-top: 0; }
+
+.search--sm > .input { padding-left: 34px; }
+.search--sm > .icon { left: 10px; width: 16px; height: 16px; }
+
+.fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+.fieldset > .field__label { margin-bottom: var(--sp-2); }
+.check-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--sp-4); }
+.checkbox__hint { display: block; font-size: var(--fs-13); color: var(--text-muted); }
+
+.temp-password { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); border: 1px solid var(--border); border-radius: var(--radius); background: var(--c-lighter); }
+.temp-password__value { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-size: var(--fs-20); font-weight: var(--fw-semibold); letter-spacing: 0.04em; user-select: all; }
+
+.cell-clip { display: block; max-width: 340px; }
+.table tr.is-closed td { color: var(--text-muted); }
+.table tr.is-closed .table__title { color: var(--text-muted); font-weight: var(--fw-regular); }
+.table tr.is-system td { color: var(--text-muted); }
+
+.file--failed .file__icon { border-color: var(--c-brand-tint-border); }
+.toast__text--plain { color: var(--c-white); }
+
+/* Шапка карточки: длинные названия и действия не наезжают друг на друга */
+.page__title { overflow-wrap: anywhere; }
+.page__actions { flex-wrap: wrap; justify-content: flex-end; }
+.card__header { flex-wrap: wrap; }
+.action-panel > .text-sm { margin-top: calc(var(--sp-2) * -1); }
+
+@media (max-width: 959px) {
+  .stats--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* Правки по итогам просмотра скриншотов */
+.empty--compact .empty__title { font-size: var(--fs-14); font-weight: var(--fw-regular); color: var(--text-muted); }
+.dl__value .chip { white-space: normal; height: auto; min-height: 26px; padding-top: 3px; padding-bottom: 3px; line-height: 1.35; }
+.pagination__size { white-space: nowrap; }
+.pagination__select { width: 76px; }
+.filters__row--docs { grid-template-columns: minmax(260px, 2fr) repeat(4, minmax(128px, 1fr)) auto; }
+.td-person { min-width: 150px; max-width: 220px; }
+@media (max-width: 1199px) {
+  .filters__row--docs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .filters__row--docs > :first-child { grid-column: 1 / -1; }
+}
+@media (max-width: 719px) { .filters__row--docs { grid-template-columns: minmax(0, 1fr); } }
+.chip__moves { opacity: 0; transition: opacity var(--t-fast) var(--ease); }
+.chip:hover .chip__moves, .chip:focus-within .chip__moves { opacity: 1; }
+.deal-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-4) var(--sp-6); }
+.deal-facts__term { font-size: var(--fs-13); color: var(--text-muted); }
+.deal-facts__value { margin-top: 2px; font-weight: var(--fw-medium); }
+@media (max-width: 959px) { .deal-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* До 1200 px обёртка таблицы прокручивается сама — шапку прижимаем к её верху (дефект сочетания sticky и overflow) */
+@media (max-width: 1199px) { .table-wrap > .table--sticky { --table-sticky-top: 0px !important; } }

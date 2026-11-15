@@ -8,7 +8,7 @@ import { Modal } from '../../components/Modal';
 import { useToast } from '../../components/Toast';
 import { UserPicker } from '../../components/UserPicker';
 import { Alert, Button, Field, cx } from '../../components/ui';
-import { isoDay } from '../../lib/format';
+import { dueFromDay, isoDay } from '../../lib/format';
 
 interface Props {
   /** Документ-основание: при создании из приказа заполнен и не редактируется. */
@@ -101,7 +101,7 @@ export function TaskCreateModal({ document: fixedDoc, onClose, onCreated }: Prop
         title: title.trim(),
         body: body.trim() || undefined,
         assigneeId: assignee[0].id,
-        dueAt: due,
+        dueAt: dueFromDay(due),
         documentId: doc?.id ?? null,
         observerIds: observers.map((u) => u.id),
       });

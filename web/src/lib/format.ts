@@ -176,3 +176,12 @@ export function ext(name: string): string {
   const m = /\.([^.]+)$/.exec(name);
   return m ? m[1].toLowerCase() : '';
 }
+
+/**
+ * Срок из поля даты: конец выбранного дня по местному времени.
+ * Сервер толкует «ГГГГ-ММ-ДД» как конец дня по UTC (в Москве — 02:59 следующего дня), поэтому передаём точное время.
+ */
+export function dueFromDay(day: string): string {
+  const [y, m, d] = day.split('-').map(Number);
+  return new Date(y, m - 1, d, 23, 59, 0).toISOString();
+}

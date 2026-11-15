@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ApiError, api, errorText, upload } from '../../api/client';
+import { ApiError, api, upload } from '../../api/client';
 import { useDocumentTitle, useInterval } from '../../api/hooks';
 import type { BitrixRetryResponse, DocKind, DocumentDetail, FileItem, FileVersion, HistoryEntry, Page, UserRef } from '../../api/types';
 import { DEFAULT_EXTS, Dropzone, EXCEL_EXTS, FileList, FilePickButton, checkFile, downloadVersion } from '../../components/Files';
@@ -484,7 +484,7 @@ export function DocumentCardPage({ kind }: { kind: DocKind }) {
     if (isInitiator && doc.status === 'in_review') {
       return {
         title: 'Документ на согласовании',
-        text: round?.mode === 'parallel' ? `Ждём решения: ${joinRu(pending.map((s) => s.user.fullName))}.` : pending[0] ? `Сейчас решение принимает ${pending[0].user.fullName} — документ у этого согласующего ${daysAt(pending[0].activatedAt)}.` : undefined,
+        text: round?.mode === 'parallel' ? `Ждём решения: ${joinRu(pending.map((s) => s.user.fullName))}.` : pending[0] ? `Сейчас решение принимает ${pending[0].user.fullName} — документ ждёт решения ${daysAt(pending[0].activatedAt)}.` : undefined,
         calm: true,
         actions: p.canRemind ? <Button onClick={remind}>Напомнить согласующим</Button> : undefined,
       };
@@ -1025,4 +1025,3 @@ function CardSkeleton() {
   );
 }
 
-export { errorText };
