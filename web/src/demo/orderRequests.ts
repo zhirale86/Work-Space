@@ -3,6 +3,8 @@ import type { OrderRequestApprover, OrderRequestInfo, OrderRequestState } from '
 import { AppError, conflict, notFound } from '../../../server/src/errors';
 import { type Actor, audit, formatDateTimeRu, isAdmin, isoReq, refOf, requireDocument } from './core';
 import { appHref } from './bitrix';
+import { toListItem } from './documents';
+import type { DocumentListItem } from '../api/types';
 import { type DocRow, db, getBlob, nextId, now } from './db';
 
 interface OrderRequestRow {
@@ -159,4 +161,13 @@ export function orderRequestFile(id: number): { name: string; mime: string; byte
   const bytes = getBlob(v.storage_key);
   if (!bytes) throw notFound('Содержимое файла не сохранилось после перезагрузки страницы демо');
   return { name: v.original_name, mime: v.mime, bytes };
+}
+
+/** Согласованные GPM, по которым пользователь может отправить запрос, но ещё не отправил. */
+export function readyForOrder(actor: Actor): { items: DocumentListItem[] } {
+  const items = db.documents
+    .filter((d) => isGpm(d) && d.status === 'approved' && !rows().some((r) => r.document_id === d.id) && blocker(d, actor) === null)
+    .sort((a, b) => b.created_at - a.created_at)
+    .map((d) => toListItem(d, actor));
+  return { items };
 }

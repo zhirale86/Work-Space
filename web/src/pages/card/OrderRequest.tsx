@@ -1,5 +1,6 @@
 /** Запрос на создание заказа в Битрикс24 по согласованному GPM-калькулятору. */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '../../api/client';
 import { useApi } from '../../api/hooks';
 import { ORDER_FLOW_NAME, type OrderRequestApprover, type OrderRequestInfo, type OrderRequestState } from '../../api/orderRequest';
@@ -147,7 +148,15 @@ function SendModal({ doc, st, onClose, onSent }: { doc: DocumentDetail; st: Orde
 export function useOrderRequest(doc: DocumentDetail | null, enabled: boolean, onChanged?: () => void) {
   const st = useApi<OrderRequestState>(enabled && doc && doc.kind === 'approval' && doc.type.code === 'GPM' ? `/documents/${doc.id}/order-request` : null, { s: doc?.status });
   const [open, setOpen] = useState(false);
+  const [params, setParams] = useSearchParams();
   const data = st.data;
+  // Ссылка «…?order=1» с главной сразу открывает окно отправки.
+  useEffect(() => {
+    if (params.get('order') === '1' && data?.canSend && data.preview) {
+      setOpen(true);
+      setParams((sp) => (sp.delete('order'), sp), { replace: true });
+    }
+  }, [params, data, setParams]);
   const reload = () => st.reload(true);
 
   if (!doc) return { banner: null, card: null, modal: null };
@@ -165,6 +174,11 @@ export function useOrderRequest(doc: DocumentDetail | null, enabled: boolean, on
         }
       >
         Отправьте в Битрикс24 запрос на создание заказа: в нём будет отметка о согласовании, список согласовавших и последняя версия калькулятора.
+      </Alert>
+    ) : data && !data.request && !data.canSend && data.preview ? (
+      <Alert tone="info" title="GPM-калькулятор согласован">
+        Запрос на создание заказа в Битрикс24 отправляет инициатор — {doc.initiator.fullName} (или администратор).
+        {import.meta.env.VITE_DEMO === '1' && ' В демо переключитесь на него через «Демо-режим» в верхней панели.'}
       </Alert>
     ) : null;
 

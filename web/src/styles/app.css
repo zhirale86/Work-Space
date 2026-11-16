@@ -187,3 +187,4 @@ button.stat:disabled { cursor: default; }
 .order-req__approvers .icon { color: var(--c-ok); margin-top: 3px; flex: none; }
 .order-req__file { display: flex; gap: 6px; align-items: flex-start; }
 .order-req__file .icon { flex: none; margin-top: 2px; }
+.ready-order { border-color: var(--c-ok-border); }

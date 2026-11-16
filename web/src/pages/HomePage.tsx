@@ -1,3 +1,4 @@
+import { ReadyForOrder } from './ReadyForOrder';
 import { useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApi, useDelayed, useDocumentTitle } from '../api/hooks';
@@ -205,6 +206,7 @@ export function HomePage() {
     return (
       <>
         {header(lead)}
+        <ReadyForOrder />
         <div className="card">
           <Empty
             icon="check"
@@ -273,6 +275,7 @@ export function HomePage() {
         {tile(d.toAcknowledge.count, 'Приказы на ознакомление', nearestHint(d.toAcknowledge.items, d.toAcknowledge.count ? 'без срока' : 'все прочитаны'), () => scrollTo('b-ack'))}
         {tile(d.overdue.count, 'Просрочено', d.overdue.count ? 'требуют действия сегодня' : 'всё в срок', () => navigate('/documents?overdue=1'), true)}
       </div>
+      <ReadyForOrder />
       <div className="layout-home section">
         <div className="stack stack--lg">
           <Block id="b-decide" title="Ждут моего решения" total={decide} link={{ to: '/approvals?scope=to_approve', label: 'Все согласования' }} rows={decideRows} empty="Нет согласований, ожидающих вашего решения" />
