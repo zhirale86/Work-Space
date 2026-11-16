@@ -187,7 +187,7 @@ export function filterDocuments(actor: Actor, f: DocumentFilters): DocRow[] {
       }
       if (f.pendingAcknowledgement) {
         if (!(d.kind === 'order' && d.status === 'approved' && pendingAck(d))) return false;
-        if (!isAuditor(actor) && d.initiator_id !== me && d.signer_id !== me) return false;
+        if (!isAuditor(actor) && !isAdmin(actor) && d.initiator_id !== me && d.signer_id !== me) return false;
       }
       return true;
     })
@@ -313,7 +313,7 @@ export function buildDetail(actor: Actor, doc: DocRow): DocumentDetail {
   else if (doc.status === 'rework' && isInit) myAction = 'rework';
   else if (doc.kind === 'order' && doc.status === 'approved' && inAcq && !myAck) myAction = 'acknowledge';
 
-  const canViewAck = doc.kind === 'order' && (isInit || isSigner || auditor);
+  const canViewAck = doc.kind === 'order' && (isInit || isSigner || auditor || admin);
   const reminded = !!doc.last_reminded_at && now() - doc.last_reminded_at < 24 * 3600 * 1000;
 
   const permissions: DocumentPermissions = {

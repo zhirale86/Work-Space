@@ -172,3 +172,11 @@ button.stat { width: 100%; font: inherit; cursor: pointer; }
 @media (max-width: 959px) { .deal-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 /* До 1200 px обёртка таблицы прокручивается сама — шапку прижимаем к её верху (дефект сочетания sticky и overflow) */
 @media (max-width: 1199px) { .table-wrap > .table--sticky { --table-sticky-top: 0px !important; } }
+
+/* Отчёты: цифры с провалом в список */
+.num-link { font-variant-numeric: tabular-nums; font-weight: 600; text-decoration-color: var(--c-gray); }
+.num-link:hover { color: var(--c-brand); }
+.stats--drill { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.stats--drill .stat { border: 1px solid var(--border); }
+button.stat:disabled { cursor: default; }
+@media (max-width: 1100px) { .stats--drill { grid-template-columns: repeat(3, minmax(0, 1fr)); } }

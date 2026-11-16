@@ -14,6 +14,7 @@ import { type Actor, type Paging, byName, deptRef, docVisible, formatDateTimeRu,
 import { db, now } from './db';
 import { type DocumentFilters, acknowledgementSummary, filterDocuments, queryDocuments } from './documents';
 import { type TaskFilters, filterTasks, queryTasks } from './tasks';
+import { approverMatch, stepsOf } from './reportsExt';
 
 const SHORT: Paging = { page: 1, pageSize: 5 };
 
@@ -56,25 +57,25 @@ export interface ReportFilter {
   departmentId?: number;
 }
 
+/** Каждый показатель — число различных документов (совпадает со списком при провале в цифру). */
 function byEmployee(actor: Actor, f: ReportFilter): ApprovalsByEmployeeItem[] {
   const map = new Map<number, ApprovalsByEmployeeItem>();
-  for (const s of db.steps) {
-    if (!['pending', 'approved', 'rework', 'rejected'].includes(s.state)) continue;
-    const r = db.rounds.find((x) => x.id === s.round_id);
-    const d = r && db.documents.find((x) => x.id === r.document_id);
-    if (!d || !docVisible(actor, d)) continue;
-    if (f.userId && s.user_id !== f.userId) continue;
-    if (f.departmentId && userById(s.user_id)?.department_id !== f.departmentId) continue;
-    const it = map.get(s.user_id) ?? { user: refOf(s.user_id), pending: 0, overdue: 0, approved: 0, returned: 0, rejected: 0, total: 0 };
-    if (s.state === 'pending') {
-      it.pending++;
-      if (d.due_at !== null && d.due_at < now()) it.overdue++;
+  for (const d of db.documents) {
+    if (!docVisible(actor, d)) continue;
+    const users = uniq(db.steps.filter((s) => db.rounds.some((r) => r.id === s.round_id && r.document_id === d.id)).map((s) => s.user_id));
+    for (const uid of users) {
+      if (!stepsOf(uid, d.id).length) continue;
+      if (f.userId && uid !== f.userId) continue;
+      if (f.departmentId && userById(uid)?.department_id !== f.departmentId) continue;
+      const it = map.get(uid) ?? { user: refOf(uid), pending: 0, overdue: 0, approved: 0, returned: 0, rejected: 0, total: 0 };
+      if (approverMatch(d, uid, 'pending')) it.pending++;
+      if (approverMatch(d, uid, 'overdue')) it.overdue++;
+      if (approverMatch(d, uid, 'approved')) it.approved++;
+      if (approverMatch(d, uid, 'rework')) it.returned++;
+      if (approverMatch(d, uid, 'rejected')) it.rejected++;
+      it.total++;
+      map.set(uid, it);
     }
-    if (s.state === 'approved') it.approved++;
-    if (s.state === 'rework') it.returned++;
-    if (s.state === 'rejected') it.rejected++;
-    it.total++;
-    map.set(s.user_id, it);
   }
   return [...map.keys()].sort((a, b) => byName(a, b) || a - b).map((k) => map.get(k)!);
 }

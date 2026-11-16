@@ -42,6 +42,7 @@ import { db, now, saveSoon } from './db';
 import * as docs from './documents';
 import { LIMITS, deleteFile, openDownload, saveFile, sha256Hex, type UploadTarget } from './files';
 import { checkDeadlines, dashboard, report, reportSummary } from './reports';
+import { allApprovals, drill, myApprovals } from './reportsExt';
 import * as tasks from './tasks';
 
 export interface DemoRequest {
@@ -365,6 +366,9 @@ route('POST', '/notifications/read-all', (c) => {
 });
 route('GET', '/dashboard', (c) => dashboard(c.actor));
 route('GET', '/reports/summary', (c) => reportSummary(c.actor));
+route('GET', '/report-ext/my', (c) => myApprovals(c.actor));
+route('GET', '/report-ext/drill', (c) => drill(c.actor, c.query, paging(c.query, 25)));
+route('GET', '/report-ext/all', (c) => allApprovals(c.actor, c.query, paging(c.query, 25)));
 route('GET', '/reports/:code', (c) =>
   report(c.actor, decodeURIComponent(c.params.code), { userId: optId(c.query.userId, 'userId'), departmentId: optId(c.query.departmentId, 'departmentId') }, paging(c.query)),
 );

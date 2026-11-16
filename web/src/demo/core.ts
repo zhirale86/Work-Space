@@ -203,7 +203,8 @@ export const TASK_NOT_FOUND = 'Поручение не найдено или н�
  * утверждения приказа; индивидуальный доступ и доступ подразделения; роль «Контроль документов».
  */
 export function docVisible(actor: Actor, d: DocRow): boolean {
-  if (isAuditor(actor)) return true;
+  // Администратор и «Контроль документов» видят все документы, включая завершённые (только просмотр).
+  if (isAuditor(actor) || isAdmin(actor)) return true;
   if (d.initiator_id === actor.id) return true;
   const roundIds = new Set(db.rounds.filter((r) => r.document_id === d.id).map((r) => r.id));
   if (db.steps.some((s) => roundIds.has(s.round_id) && s.user_id === actor.id && s.activated_at !== null && s.state !== 'replaced')) return true;

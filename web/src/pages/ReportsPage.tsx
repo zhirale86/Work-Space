@@ -7,6 +7,8 @@ import { DocStatusBadge, Due, Empty, LoadError, Loading, PageHeader, SkeletonTil
 import { overdueSpan } from '../lib/format';
 import { docPath } from '../lib/status';
 import { useAuth } from '../layout/Auth';
+import { type AllApprovalsReport, type MyApprovalsReport, REPORTS_EXT_ENABLED } from '../api/reportsExt';
+import { AllApprovalsView, DrillNum, DrillView, MyApprovalsView, drillPath } from './reports/ReportsExt';
 
 const TILES: { code: ReportCode; label: string; accent?: boolean; zeroHint: string }[] = [
   { code: 'approvals_in_progress', label: 'Согласования в работе', zeroHint: 'нет в работе' },
@@ -19,25 +21,31 @@ const TILES: { code: ReportCode; label: string; accent?: boolean; zeroHint: stri
 ];
 
 const CODES = new Set<string>([...TILES.map((t) => t.code), 'approvals_by_department']);
+type ExtCode = 'my_approvals' | 'all_approvals' | 'drill';
+const EXT_CODES = new Set<string>(REPORTS_EXT_ENABLED ? ['my_approvals', 'all_approvals', 'drill'] : []);
 
 export function ReportsPage() {
   useDocumentTitle('Отчёты');
   const { code: codeParam } = useParams();
+  const { hasRole, user: me } = useAuth();
+  const canAll = hasRole('admin') || hasRole('auditor');
+  const ext = (EXT_CODES.has(codeParam ?? '') && (codeParam !== 'all_approvals' || canAll) ? codeParam : null) as ExtCode | null;
   const code = (CODES.has(codeParam ?? '') ? codeParam : 'approvals_in_progress') as ReportCode;
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
-  const { hasRole } = useAuth();
   const page = Math.max(1, Number(params.get('page')) || 1);
   const pageSize = 25;
   const departmentId = params.get('departmentId') ?? undefined;
   const userId = params.get('userId') ?? undefined;
   const summary = useApi<ReportSummaryResponse>('/reports/summary');
-  const report = useApi<ReportResponse>(`/reports/${code}`, { departmentId, userId, page, pageSize });
+  const report = useApi<ReportResponse>(ext ? null : `/reports/${code}`, { departmentId, userId, page, pageSize });
+  const myExt = useApi<MyApprovalsReport>(REPORTS_EXT_ENABLED ? '/report-ext/my' : null);
+  const allExt = useApi<AllApprovalsReport>(REPORTS_EXT_ENABLED && canAll ? '/report-ext/all' : null, { pageSize: 1 });
   const depts = useApi<{ items: Department[] }>('/departments');
   const tilesSkeleton = useDelayed(summary.loading && !summary.data);
   const tableSkeleton = useDelayed(report.loading);
   const byGroup = code === 'approvals_by_employee' || code === 'approvals_by_department';
-  const activeTile = byGroup ? 'approvals_by_employee' : code;
+  const activeTile: string = ext === 'drill' ? '' : ext ?? (byGroup ? 'approvals_by_employee' : code);
 
   const set = (patch: Record<string, string | null>) => {
     const sp = new URLSearchParams(params);
@@ -45,12 +53,14 @@ export function ReportsPage() {
     sp.delete('page');
     setParams(sp);
   };
-  const go = (c: ReportCode) => navigate({ pathname: `/reports/${c}`, search: new URLSearchParams([...params.entries()].filter(([k]) => k !== 'page')).toString() });
+  const go = (c: ReportCode | ExtCode) => navigate({ pathname: `/reports/${c}`, search: new URLSearchParams([...params.entries()].filter(([k]) => k !== 'page')).toString() });
   const countOf = (c: ReportCode) => summary.data?.items.find((i) => i.code === c)?.count ?? 0;
   const user: UserRef[] = userId ? [{ id: Number(userId), fullName: params.get('userName') ?? '…', position: '', department: null, active: true }] : [];
 
   const r = report.data;
   const emptyTitle = code === 'approvals_overdue' ? 'Просроченных согласований нет — всё в срок.' : code === 'tasks_overdue' ? 'Просроченных поручений нет — всё в срок.' : 'Таких документов сейчас нет';
+
+  const num = (n: number, to: string, danger?: boolean) => (REPORTS_EXT_ENABLED ? <DrillNum n={n} to={to} danger={danger} /> : <span className={cx(danger && n > 0 && 'text-danger')}>{n}</span>);
 
   const table = () => {
     if (!r) return null;
@@ -185,7 +195,7 @@ export function ReportsPage() {
                   Отклонено
                 </th>
                 <th scope="col" className="td-num">
-                  Всего решений
+                  Всего
                 </th>
               </tr>
             </thead>
@@ -196,12 +206,12 @@ export function ReportsPage() {
                     {x.user.fullName}
                     <span className="table__sub">{x.user.department?.name ?? '—'}</span>
                   </td>
-                  <td className="td-num">{x.pending}</td>
-                  <td className={cx('td-num', x.overdue > 0 && 'text-danger')}>{x.overdue}</td>
-                  <td className="td-num">{x.approved}</td>
-                  <td className="td-num">{x.returned}</td>
-                  <td className="td-num">{x.rejected}</td>
-                  <td className="td-num">{x.total}</td>
+                  <td className="td-num">{num(x.pending, drillPath('approver', x.user.id, 'pending'))}</td>
+                  <td className="td-num">{num(x.overdue, drillPath('approver', x.user.id, 'overdue'), true)}</td>
+                  <td className="td-num">{num(x.approved, drillPath('approver', x.user.id, 'approved'))}</td>
+                  <td className="td-num">{num(x.returned, drillPath('approver', x.user.id, 'rework'))}</td>
+                  <td className="td-num">{num(x.rejected, drillPath('approver', x.user.id, 'rejected'))}</td>
+                  <td className="td-num">{num(x.total, drillPath('approver', x.user.id, 'all'))}</td>
                 </tr>
               ))}
             </tbody>
@@ -237,12 +247,12 @@ export function ReportsPage() {
               {(r.items as ApprovalsByDepartmentItem[]).map((x, i) => (
                 <tr key={x.department?.id ?? `n${i}`}>
                   <td className="td-main">{x.department?.name ?? 'Без подразделения'}</td>
-                  <td className="td-num">{x.inProgress}</td>
-                  <td className="td-num">{x.rework}</td>
-                  <td className="td-num">{x.approved}</td>
-                  <td className="td-num">{x.rejected}</td>
-                  <td className="td-num">{x.cancelled}</td>
-                  <td className="td-num">{x.total}</td>
+                  <td className="td-num">{num(x.inProgress, drillPath('department', x.department?.id ?? 0, 'in_progress'))}</td>
+                  <td className="td-num">{num(x.rework, drillPath('department', x.department?.id ?? 0, 'rework'))}</td>
+                  <td className="td-num">{num(x.approved, drillPath('department', x.department?.id ?? 0, 'approved'))}</td>
+                  <td className="td-num">{num(x.rejected, drillPath('department', x.department?.id ?? 0, 'rejected'))}</td>
+                  <td className="td-num">{num(x.cancelled, drillPath('department', x.department?.id ?? 0, 'cancelled'))}</td>
+                  <td className="td-num">{num(x.total, drillPath('department', x.department?.id ?? 0, 'all'))}</td>
                 </tr>
               ))}
             </tbody>
@@ -253,7 +263,8 @@ export function ReportsPage() {
 
   return (
     <>
-      <PageHeader title="Отчёты" lead="Показатели на сейчас. Нажмите на показатель, чтобы открыть список." meta={!hasRole('auditor') ? <span>Показаны документы, к которым у вас есть доступ.</span> : <span>Показатели по всей компании.</span>} />
+      <PageHeader title="Отчёты" lead="Показатели на сейчас. Нажмите на показатель или цифру в таблице, чтобы открыть список, а затем — карточку." meta={!canAll ? <span>Показаны документы, к которым у вас есть доступ.</span> : <span>Показатели по всей компании.</span>} />
+      {!ext && (
       <div className="filters filters--inline" role="group" aria-label="Фильтры отчёта">
         <div className="filters__row filters__row--report">
           <label className="field">
@@ -273,6 +284,7 @@ export function ReportsPage() {
           </div>
         </div>
       </div>
+      )}
       <div className="section section--tight">
         {summary.error ? (
           <div className="card">
@@ -282,6 +294,20 @@ export function ReportsPage() {
           tilesSkeleton ? <SkeletonTiles n={7} /> : <Loading />
         ) : (
           <div className="stats stats--report">
+            {REPORTS_EXT_ENABLED && myExt.data && (
+              <button type="button" className={cx('stat', activeTile === 'my_approvals' && 'is-active')} aria-pressed={activeTile === 'my_approvals'} onClick={() => go('my_approvals')}>
+                <span className="stat__value">{myExt.data.approver.all + myExt.data.initiator.all}</span>
+                <span className="stat__label">Мои согласования</span>
+                <span className="stat__hint">{activeTile === 'my_approvals' ? 'выбрано' : 'я согласующий и инициатор'}</span>
+              </button>
+            )}
+            {REPORTS_EXT_ENABLED && canAll && allExt.data && (
+              <button type="button" className={cx('stat', activeTile === 'all_approvals' && 'is-active')} aria-pressed={activeTile === 'all_approvals'} onClick={() => go('all_approvals')}>
+                <span className="stat__value">{allExt.data.counts.all}</span>
+                <span className="stat__label">Все согласования компании</span>
+                <span className="stat__hint">{activeTile === 'all_approvals' ? 'выбрано' : 'включая завершённые'}</span>
+              </button>
+            )}
             {TILES.map((t) => {
               const n = t.code === 'approvals_by_employee' ? Math.max(countOf('approvals_by_employee'), countOf('approvals_by_department')) : countOf(t.code);
               return (
@@ -295,6 +321,22 @@ export function ReportsPage() {
           </div>
         )}
       </div>
+      {ext === 'my_approvals' && me && (
+        <div className="section section--tight">
+          <MyApprovalsView userId={me.id} />
+        </div>
+      )}
+      {ext === 'all_approvals' && (
+        <div className="section section--tight">
+          <AllApprovalsView />
+        </div>
+      )}
+      {ext === 'drill' && (
+        <div className="section section--tight">
+          <DrillView />
+        </div>
+      )}
+      {!ext && (
       <div className="section section--tight">
         {byGroup && (
           <div className="segmented report-switch" role="radiogroup" aria-label="Разрез">
@@ -321,6 +363,7 @@ export function ReportsPage() {
           </div>
         )}
       </div>
+      )}
     </>
   );
 }
