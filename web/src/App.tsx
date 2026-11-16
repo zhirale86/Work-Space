@@ -7,6 +7,7 @@ import { AuditPage, BitrixAdminPage } from './pages/admin/BitrixAuditPages';
 import { DepartmentsPage, DocTypesPage } from './pages/admin/DirectoryPages';
 import { UsersPage } from './pages/admin/UsersPage';
 import { DealPage, DealsListPage } from './pages/b24/EmulatorPages';
+import { OrderRequestPage } from './pages/b24/OrderRequestPages';
 import { DocumentCardPage } from './pages/card/DocumentCardPage';
 import { DocumentListPage } from './pages/DocumentListPage';
 import { DocumentEditPage } from './pages/edit/DocumentEditPage';
@@ -88,6 +89,7 @@ export function buildRoutes({ Root: RootEl = Root, Login = LoginPage }: AppShell
             },
             { path: '/b24', element: <DealsListPage /> },
             { path: '/b24/deals/:id', element: <Keyed render={() => <DealPage />} /> },
+            { path: '/b24/order-requests/:id', element: <Keyed render={() => <OrderRequestPage />} /> },
             { path: '/bitrix-mock/deals', element: <DealsListPage /> },
             { path: '/bitrix-mock/deals/:id', element: <Keyed render={() => <DealPage />} /> },
             { path: '*', element: <NotFoundPage /> },

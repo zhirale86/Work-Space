@@ -43,6 +43,7 @@ import * as docs from './documents';
 import { LIMITS, deleteFile, openDownload, saveFile, sha256Hex, type UploadTarget } from './files';
 import { checkDeadlines, dashboard, report, reportSummary } from './reports';
 import { allApprovals, drill, myApprovals } from './reportsExt';
+import { getOrderRequest, listOrderRequests, orderRequestFile, orderRequestState, sendOrderRequest } from './orderRequests';
 import * as tasks from './tasks';
 
 export interface DemoRequest {
@@ -395,6 +396,11 @@ route('POST', '/documents/:id/bitrix/retry', (c) => {
   return { bitrix: toLinkInfo(getLink(id)!) };
 });
 route('GET', '/bitrix-mock/deals', (c) => ({ items: listMockDeals(c.query.q ?? '') }));
+route('GET', '/documents/:id/order-request', (c) => orderRequestState(c.actor, idOf(c.params.id)));
+route('POST', '/documents/:id/order-request', (c) => sendOrderRequest(c.actor, idOf(c.params.id), (c.body ?? {}) as { comment?: unknown }));
+route('GET', '/bitrix-mock/order-requests', (c) => listOrderRequests(c.query.dealId || undefined));
+route('GET', '/bitrix-mock/order-requests/:id', (c) => getOrderRequest(idOf(c.params.id)));
+route('GET', '/bitrix-mock/order-requests/:id/file', (c) => ({ __file: orderRequestFile(idOf(c.params.id)) }));
 route('GET', '/bitrix-mock/deals/:id', (c) => getMockDeal(idOf(c.params.id)));
 route('DELETE', '/bitrix-mock/tasks/:id', (c) => {
   requireRole(c.actor, 'admin');

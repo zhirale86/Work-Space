@@ -5,6 +5,8 @@ import { Alert, Button, Empty, LoadError, Loading, PageHeader, cx } from '../../
 import { dateTime, money, NBSP } from '../../lib/format';
 import { APPROVAL_STATUS_LABELS, DOC_BADGE } from '../../lib/status';
 import { useAuth } from '../../layout/Auth';
+import { ORDER_REQUEST_ENABLED } from '../../api/orderRequest';
+import { DealOrderRequests } from './OrderRequestPages';
 
 /** Предупреждение режима «Эмулятор недоступен» — видно только администратору (флаг читается из /admin/bitrix). */
 function UnavailableNote() {
@@ -223,6 +225,7 @@ export function DealPage() {
               </div>
             )}
           </section>
+        {ORDER_REQUEST_ENABLED && <DealOrderRequests dealId={data.id} />}
         <p className="text-sm text-muted">Изменить или закрыть запись здесь нельзя: источник статуса — Документооборот.</p>
       </div>
     </>

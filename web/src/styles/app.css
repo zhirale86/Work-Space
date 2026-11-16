@@ -180,3 +180,10 @@ button.stat { width: 100%; font: inherit; cursor: pointer; }
 .stats--drill .stat { border: 1px solid var(--border); }
 button.stat:disabled { cursor: default; }
 @media (max-width: 1100px) { .stats--drill { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* Запрос на создание заказа */
+.order-req__approvers { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: var(--fs-14); }
+.order-req__approvers li { display: flex; gap: 8px; align-items: flex-start; }
+.order-req__approvers .icon { color: var(--c-ok); margin-top: 3px; flex: none; }
+.order-req__file { display: flex; gap: 6px; align-items: flex-start; }
+.order-req__file .icon { flex: none; margin-top: 2px; }

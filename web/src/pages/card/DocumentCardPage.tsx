@@ -17,6 +17,8 @@ import { NoAccess } from '../Misc';
 import { TaskCreateModal } from '../tasks/TaskCreateModal';
 import { AccessModal, AcquaintanceModal, ApproveModal, RouteModal } from './dialogs';
 import { DealCard, HistoryCard, InfoCard, RouteCard } from './parts';
+import { useOrderRequest } from './OrderRequest';
+import { ORDER_REQUEST_ENABLED } from '../../api/orderRequest';
 import { AcknowledgementTab } from './AcknowledgementTab';
 
 type Dialog =
@@ -250,6 +252,7 @@ export function DocumentCardPage({ kind }: { kind: DocKind }) {
   };
 
   const ack = useMemo(() => doc?.acknowledgements ?? null, [doc]);
+  const orderReq = useOrderRequest(doc, ORDER_REQUEST_ENABLED, () => void load(true));
 
   if (error) return error.status === 404 || error.status === 400 ? <NoAccess /> : <LoadError title="Не удалось загрузить карточку" onRetry={() => void load()} />;
   if (!doc) return <CardSkeleton />;
@@ -833,15 +836,18 @@ export function DocumentCardPage({ kind }: { kind: DocKind }) {
           </Alert>
         )}
         {syncedJustNow && doc.bitrix?.state === 'synced' && <Alert tone="success">Статус передан в Битрикс24</Alert>}
+        {orderReq.banner}
       </div>
       <div className="layout-split">
         {main}
         <aside className="layout-split__aside">
           {!order && <DealCard doc={doc} onRetry={p.canRetryBitrix ? retryBitrix : undefined} retrying={retrying} />}
+          {orderReq.card}
           <InfoCard doc={doc} />
         </aside>
       </div>
 
+      {orderReq.modal}
       {dialog === 'approve' && <ApproveModal onClose={() => setDialog(null)} onConfirm={decide('approve', 'decision')} />}
       {dialog === 'rework' && (
         <ConfirmDialog
